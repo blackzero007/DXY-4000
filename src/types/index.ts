@@ -1,0 +1,33 @@
+export interface Artwork {
+  id: number;
+  title: string;
+  author: string;
+  imageData: string;
+  likes: number;
+  createdAt: number;
+}
+
+export interface Comment {
+  id: number;
+  artworkId: number;
+  author: string;
+  content: string;
+  createdAt: number;
+}
+
+export type SortType = 'hot' | 'latest';
+
+export type ToolType = 'pen' | 'eraser';
+
+export interface CanvasState {
+  color: string;
+  brushSize: number;
+  tool: ToolType;
+  isDrawing: boolean;
+}
+
+export interface ApiResponse<T> {
+  data: T;
+  message?: string;
+  total?: number;
+}
