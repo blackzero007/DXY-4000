@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Palette, Sparkles } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Palette, Sparkles, Search, X } from 'lucide-react';
 import { ArtworkGrid } from '../components/Gallery/ArtworkGrid';
 import { SortTabs } from '../components/Gallery/SortTabs';
 import { api } from '../utils/api';
@@ -9,6 +9,15 @@ export const GalleryPage: React.FC = () => {
   const [artworks, setArtworks] = useState<Artwork[]>([]);
   const [sort, setSort] = useState<SortType>('latest');
   const [loading, setLoading] = useState(true);
+  const [searchKeyword, setSearchKeyword] = useState('');
+
+  const filteredArtworks = useMemo(() => {
+    if (!searchKeyword.trim()) return artworks;
+    const keyword = searchKeyword.toLowerCase();
+    return artworks.filter(artwork =>
+      artwork.title.toLowerCase().includes(keyword)
+    );
+  }, [artworks, searchKeyword]);
 
   useEffect(() => {
     loadArtworks();
@@ -51,20 +60,49 @@ export const GalleryPage: React.FC = () => {
             </p>
           </div>
 
+          <div className="max-w-2xl mx-auto mb-8 animate-fadeInUp">
+            <div className="relative group">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-pink-500 transition-colors" />
+              <input
+                type="text"
+                value={searchKeyword}
+                onChange={(e) => setSearchKeyword(e.target.value)}
+                placeholder="搜索作品名称..."
+                className="w-full pl-12 pr-12 py-4 bg-white/80 backdrop-blur-sm border-2 border-transparent rounded-2xl shadow-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:border-pink-300 focus:bg-white transition-all duration-300 hover:shadow-xl"
+              />
+              {searchKeyword && (
+                <button
+                  type="button"
+                  onClick={() => setSearchKeyword('')}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-all"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          </div>
+
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-gradient-to-br from-pink-400 to-yellow-400 rounded-2xl flex items-center justify-center shadow-lg">
                 <Palette className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gray-800">全部作品</h2>
-                <p className="text-sm text-gray-500">共 {artworks.length} 幅作品</p>
+                <h2 className="text-xl font-bold text-gray-800">
+                  {searchKeyword ? '搜索结果' : '全部作品'}
+                </h2>
+                <p className="text-sm text-gray-500">
+                  {searchKeyword
+                    ? `找到 ${filteredArtworks.length} 幅相关作品`
+                    : `共 ${artworks.length} 幅作品`
+                  }
+                </p>
               </div>
             </div>
             <SortTabs sort={sort} onSortChange={setSort} />
           </div>
 
-          <ArtworkGrid artworks={artworks} loading={loading} />
+          <ArtworkGrid artworks={filteredArtworks} loading={loading} />
         </div>
       </div>
     </div>
