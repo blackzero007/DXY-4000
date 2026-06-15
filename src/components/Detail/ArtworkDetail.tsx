@@ -2,6 +2,7 @@ import React from 'react';
 import { User, Calendar, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { LikeButton } from './LikeButton';
+import { FavoriteButton } from './FavoriteButton';
 import { CommentSection } from './CommentSection';
 import type { Artwork } from '../../types';
 
@@ -52,11 +53,14 @@ export const ArtworkDetail: React.FC<ArtworkDetailProps> = ({ artwork, visitorId
                 </div>
               </div>
             </div>
-            <LikeButton
-              artworkId={artwork.id}
-              visitorId={visitorId}
-              initialLikes={artwork.likes}
-            />
+            <div className="flex items-center gap-3">
+              <LikeButton
+                artworkId={artwork.id}
+                visitorId={visitorId}
+                initialLikes={artwork.likes}
+              />
+              <FavoriteButton artwork={artwork} />
+            </div>
           </div>
         </div>
 

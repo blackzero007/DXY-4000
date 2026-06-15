@@ -1,9 +1,11 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Palette, Plus, Home } from 'lucide-react';
+import { Palette, Plus, Home, Star } from 'lucide-react';
+import { useFavorites } from '../../hooks/useFavorites';
 
 export const Header: React.FC = () => {
   const location = useLocation();
+  const { favorites } = useFavorites();
 
   return (
     <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-pink-100 shadow-sm">
@@ -34,6 +36,26 @@ export const Header: React.FC = () => {
             >
               <Home className="w-5 h-5" />
               <span className="hidden sm:inline">画廊</span>
+            </Link>
+            <Link
+              to="/favorites"
+              className={`
+                flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all duration-200
+                ${location.pathname === '/favorites'
+                  ? 'bg-gradient-to-r from-yellow-100 to-orange-100 text-yellow-600 shadow-md'
+                  : 'text-gray-600 hover:bg-gray-100'
+                }
+              `}
+            >
+              <div className="relative">
+                <Star className="w-5 h-5" />
+                {favorites.length > 0 && (
+                  <span className="absolute -top-2 -right-2 w-5 h-5 bg-gradient-to-r from-yellow-400 to-orange-400 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-md">
+                    {favorites.length > 99 ? '99+' : favorites.length}
+                  </span>
+                )}
+              </div>
+              <span className="hidden sm:inline">我的收藏</span>
             </Link>
             <Link
               to="/create"

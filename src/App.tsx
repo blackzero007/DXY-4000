@@ -3,6 +3,7 @@ import { Header } from "@/components/common/Header";
 import { GalleryPage } from "@/pages/GalleryPage";
 import { CreatePage } from "@/pages/CreatePage";
 import { ArtworkDetailPage } from "@/pages/ArtworkDetailPage";
+import { FavoritesPage } from "@/pages/FavoritesPage";
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
             <Route path="/" element={<GalleryPage />} />
             <Route path="/create" element={<CreatePage />} />
             <Route path="/artwork/:id" element={<ArtworkDetailPage />} />
+            <Route path="/favorites" element={<FavoritesPage />} />
           </Routes>
         </main>
       </div>
