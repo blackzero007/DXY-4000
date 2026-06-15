@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Star, Trash2, Sparkles, Search, X } from 'lucide-react';
 import { ArtworkCard } from '../components/Gallery/ArtworkCard';
-import { useFavorites } from '../hooks/useFavorites';
+import { useFavorites } from '../context/FavoritesContext';
 import { Link } from 'react-router-dom';
 
 export const FavoritesPage: React.FC = () => {

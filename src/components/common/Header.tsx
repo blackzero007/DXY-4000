@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Palette, Plus, Home, Star } from 'lucide-react';
-import { useFavorites } from '../../hooks/useFavorites';
+import { useFavorites } from '../../context/FavoritesContext';
 
 export const Header: React.FC = () => {
   const location = useLocation();

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Star } from 'lucide-react';
-import { useFavorites } from '../../hooks/useFavorites';
+import { useFavorites } from '../../context/FavoritesContext';
 import type { Artwork } from '../../types';
 
 interface FavoriteButtonProps {

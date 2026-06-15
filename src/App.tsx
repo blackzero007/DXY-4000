@@ -4,21 +4,24 @@ import { GalleryPage } from "@/pages/GalleryPage";
 import { CreatePage } from "@/pages/CreatePage";
 import { ArtworkDetailPage } from "@/pages/ArtworkDetailPage";
 import { FavoritesPage } from "@/pages/FavoritesPage";
+import { FavoritesProvider } from "@/context/FavoritesContext";
 
 export default function App() {
   return (
-    <Router>
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-yellow-50 to-blue-50">
-        <Header />
-        <main>
-          <Routes>
-            <Route path="/" element={<GalleryPage />} />
-            <Route path="/create" element={<CreatePage />} />
-            <Route path="/artwork/:id" element={<ArtworkDetailPage />} />
-            <Route path="/favorites" element={<FavoritesPage />} />
-          </Routes>
-        </main>
-      </div>
-    </Router>
+    <FavoritesProvider>
+      <Router>
+        <div className="min-h-screen bg-gradient-to-br from-pink-50 via-yellow-50 to-blue-50">
+          <Header />
+          <main>
+            <Routes>
+              <Route path="/" element={<GalleryPage />} />
+              <Route path="/create" element={<CreatePage />} />
+              <Route path="/artwork/:id" element={<ArtworkDetailPage />} />
+              <Route path="/favorites" element={<FavoritesPage />} />
+            </Routes>
+          </main>
+        </div>
+      </Router>
+    </FavoritesProvider>
   );
 }
