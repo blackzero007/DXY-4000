@@ -76,6 +76,9 @@ export function useCanvas(canvasWidth: number = 800, canvasHeight: number = 600)
     if (canvas) {
       canvas.width = canvasWidth;
       canvas.height = canvasHeight;
+      historyRef.current = [];
+      historyIndexRef.current = -1;
+      setCanUndo(false);
       initCanvas();
     }
   }, [canvasWidth, canvasHeight, initCanvas]);

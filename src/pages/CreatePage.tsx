@@ -1,20 +1,41 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Rocket, Lightbulb } from 'lucide-react';
+import { Rocket, Lightbulb, Maximize2 } from 'lucide-react';
 import { DrawingCanvas, DrawingCanvasHandle } from '../components/Canvas/DrawingCanvas';
 import { PublishModal } from '../components/common/PublishModal';
 import { api } from '../utils/api';
 import { useVisitor } from '../hooks/useVisitor';
 
+interface CanvasSize {
+  name: string;
+  width: number;
+  height: number;
+  description: string;
+}
+
+const CANVAS_SIZES: CanvasSize[] = [
+  { name: '小', width: 400, height: 300, description: '400×300' },
+  { name: '中', width: 800, height: 600, description: '800×600' },
+  { name: '大', width: 1200, height: 900, description: '1200×900' },
+];
+
 export const CreatePage: React.FC = () => {
   const canvasRef = useRef<DrawingCanvasHandle>(null);
   const [showPublishModal, setShowPublishModal] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
+  const [canvasSize, setCanvasSize] = useState<CanvasSize>(CANVAS_SIZES[1]);
   const { visitorName, updateVisitorName } = useVisitor();
   const navigate = useNavigate();
 
   const handlePublishClick = () => {
     setShowPublishModal(true);
+  };
+
+  const handleSizeChange = (size: CanvasSize) => {
+    if (size.width === canvasSize.width && size.height === canvasSize.height) return;
+    if (window.confirm('切换画布尺寸将清空当前画作，确定要继续吗？')) {
+      setCanvasSize(size);
+    }
   };
 
   const handlePublish = async (title: string, author: string) => {
@@ -54,8 +75,34 @@ export const CreatePage: React.FC = () => {
           </p>
         </div>
 
-        <div className="animate-fadeInUp">
-          <DrawingCanvas ref={canvasRef} canvasWidth={800} canvasHeight={600} />
+        <div className="flex justify-center mb-6 animate-fadeInUp">
+          <div className="inline-flex items-center gap-3 px-6 py-3 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg">
+            <div className="flex items-center gap-2 text-gray-600">
+              <Maximize2 className="w-5 h-5" />
+              <span className="text-sm font-medium">画布尺寸：</span>
+            </div>
+            <div className="flex gap-2">
+              {CANVAS_SIZES.map((size) => (
+                <button
+                  key={size.description}
+                  type="button"
+                  onClick={() => handleSizeChange(size)}
+                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+                    canvasSize.width === size.width && canvasSize.height === size.height
+                      ? 'bg-gradient-to-r from-pink-500 to-blue-500 text-white shadow-md scale-105'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:scale-102'
+                  }`}
+                >
+                  {size.name}
+                  <span className="ml-1 text-xs opacity-80">({size.description})</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
+          <DrawingCanvas ref={canvasRef} canvasWidth={canvasSize.width} canvasHeight={canvasSize.height} />
         </div>
 
         <div className="flex justify-center mt-8 animate-fadeInUp" style={{ animationDelay: '0.3s' }}>
