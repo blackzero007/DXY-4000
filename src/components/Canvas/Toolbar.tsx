@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pencil, Eraser, Undo2, Trash2, Check } from 'lucide-react';
+import { Pencil, Eraser, Undo2, Redo2, Trash2, Check } from 'lucide-react';
 import { ColorPalette } from './ColorPalette';
 import type { ToolType } from '../../types';
 
@@ -20,8 +20,10 @@ interface ToolbarProps {
   bgColor: string;
   onBgColorChange: (color: string) => void;
   onUndo: () => void;
+  onRedo: () => void;
   onClear: () => void;
   canUndo: boolean;
+  canRedo: boolean;
 }
 
 export const Toolbar: React.FC<ToolbarProps> = ({
@@ -34,8 +36,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   bgColor,
   onBgColorChange,
   onUndo,
+  onRedo,
   onClear,
   canUndo,
+  canRedo,
 }) => {
   return (
     <div className="bg-gradient-to-r from-pink-100 via-yellow-100 to-blue-100 backdrop-blur-sm rounded-2xl p-4 shadow-xl border border-white/50">
@@ -143,9 +147,26 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
               }
             `}
+            title="撤销 (Ctrl+Z)"
           >
             <Undo2 className="w-5 h-5" />
             <span className="text-sm font-medium">撤销</span>
+          </button>
+          <button
+            type="button"
+            onClick={onRedo}
+            disabled={!canRedo}
+            className={`
+              p-3 rounded-xl transition-all duration-200 flex items-center gap-2
+              ${canRedo
+                ? 'bg-white/70 text-gray-600 hover:bg-white hover:shadow-md'
+                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+              }
+            `}
+            title="重做 (Ctrl+Y)"
+          >
+            <Redo2 className="w-5 h-5" />
+            <span className="text-sm font-medium">重做</span>
           </button>
           <button
             type="button"

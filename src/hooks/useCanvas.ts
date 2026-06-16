@@ -22,10 +22,16 @@ export function useCanvas(canvasWidth: number = 800, canvasHeight: number = 600)
   const [bgColor, setBgColor] = useState(DEFAULT_BG_COLOR);
   const [isDrawing, setIsDrawing] = useState(false);
   const [canUndo, setCanUndo] = useState(false);
+  const [canRedo, setCanRedo] = useState(false);
 
   const lastPointRef = useRef<Point | null>(null);
   const historyRef = useRef<HistoryState[]>([]);
   const historyIndexRef = useRef(-1);
+
+  const updateHistoryState = useCallback(() => {
+    setCanUndo(historyIndexRef.current > 0);
+    setCanRedo(historyIndexRef.current < historyRef.current.length - 1);
+  }, []);
 
   const saveToHistory = useCallback(() => {
     const canvas = canvasRef.current;
@@ -39,8 +45,8 @@ export function useCanvas(canvasWidth: number = 800, canvasHeight: number = 600)
     historyRef.current = historyRef.current.slice(0, historyIndexRef.current + 1);
     historyRef.current.push({ imageData });
     historyIndexRef.current++;
-    setCanUndo(historyIndexRef.current > 0);
-  }, []);
+    updateHistoryState();
+  }, [updateHistoryState]);
 
   const undo = useCallback(() => {
     const canvas = canvasRef.current;
@@ -53,9 +59,41 @@ export function useCanvas(canvasWidth: number = 800, canvasHeight: number = 600)
       historyIndexRef.current--;
       const state = historyRef.current[historyIndexRef.current];
       ctx.putImageData(state.imageData, 0, 0);
-      setCanUndo(historyIndexRef.current > 0);
+      updateHistoryState();
     }
-  }, []);
+  }, [updateHistoryState]);
+
+  const redo = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    if (historyIndexRef.current < historyRef.current.length - 1) {
+      historyIndexRef.current++;
+      const state = historyRef.current[historyIndexRef.current];
+      ctx.putImageData(state.imageData, 0, 0);
+      updateHistoryState();
+    }
+  }, [updateHistoryState]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        if (e.key === 'z' || e.key === 'Z') {
+          e.preventDefault();
+          undo();
+        } else if (e.key === 'y' || e.key === 'Y') {
+          e.preventDefault();
+          redo();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [undo, redo]);
 
   const initCanvas = useCallback(() => {
     const canvas = canvasRef.current;
@@ -81,6 +119,7 @@ export function useCanvas(canvasWidth: number = 800, canvasHeight: number = 600)
       historyRef.current = [];
       historyIndexRef.current = -1;
       setCanUndo(false);
+      setCanRedo(false);
       initCanvas();
     }
   }, [canvasWidth, canvasHeight, initCanvas]);
@@ -180,6 +219,7 @@ export function useCanvas(canvasWidth: number = 800, canvasHeight: number = 600)
     historyRef.current = [];
     historyIndexRef.current = -1;
     setCanUndo(false);
+    setCanRedo(false);
     saveToHistory();
   }, [saveToHistory]);
 
@@ -201,11 +241,13 @@ export function useCanvas(canvasWidth: number = 800, canvasHeight: number = 600)
     setBackgroundColor,
     isDrawing,
     canUndo,
+    canRedo,
     startDrawing,
     draw,
     stopDrawing,
     clearCanvas,
     undo,
+    redo,
     getImageData,
     initCanvas,
   };

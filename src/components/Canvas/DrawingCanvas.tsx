@@ -66,8 +66,10 @@ export const DrawingCanvas = forwardRef<DrawingCanvasHandle, DrawingCanvasProps>
           bgColor={canvas.bgColor}
           onBgColorChange={canvas.setBackgroundColor}
           onUndo={canvas.undo}
+          onRedo={canvas.redo}
           onClear={canvas.clearCanvas}
           canUndo={canvas.canUndo}
+          canRedo={canvas.canRedo}
         />
       </div>
     );
