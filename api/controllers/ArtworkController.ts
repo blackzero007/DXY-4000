@@ -12,8 +12,8 @@ export class ArtworkController {
       const offset = req.query.offset ? parseInt(req.query.offset as string) : undefined;
       const tag = req.query.tag as ArtworkTag | undefined;
 
-      if (sort !== 'hot' && sort !== 'latest') {
-        res.status(400).json({ error: 'Invalid sort parameter. Must be "hot" or "latest"' });
+      if (sort !== 'hot' && sort !== 'latest' && sort !== 'mostComments') {
+        res.status(400).json({ error: 'Invalid sort parameter. Must be "hot", "latest" or "mostComments"' });
         return;
       }
 
