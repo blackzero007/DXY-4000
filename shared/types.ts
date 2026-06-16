@@ -18,6 +18,8 @@ export interface Comment {
   author: string;
   content: string;
   createdAt: number;
+  parentId?: number;
+  replyTo?: string;
 }
 
 export interface LikeRecord {

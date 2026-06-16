@@ -58,10 +58,16 @@ export const api = {
     return request<ApiResponse<Comment[]>>(`/artworks/${artworkId}/comments`);
   },
 
-  createComment: (artworkId: number, author: string, content: string): Promise<ApiResponse<Comment>> => {
+  createComment: (
+    artworkId: number,
+    author: string,
+    content: string,
+    parentId?: number,
+    replyTo?: string
+  ): Promise<ApiResponse<Comment>> => {
     return request<ApiResponse<Comment>>(`/artworks/${artworkId}/comments`, {
       method: 'POST',
-      body: JSON.stringify({ author, content }),
+      body: JSON.stringify({ author, content, parentId, replyTo }),
     });
   },
 

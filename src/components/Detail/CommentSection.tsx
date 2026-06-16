@@ -1,12 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Send, User, MessageCircle } from 'lucide-react';
+import { Send, User, MessageCircle, CornerDownRight } from 'lucide-react';
 import { api } from '../../utils/api';
 import type { Comment } from '../../types';
 
 interface CommentSectionProps {
   artworkId: number;
   visitorName: string;
+}
+
+interface CommentNode extends Comment {
+  replies: CommentNode[];
 }
 
 function formatDate(timestamp: number): string {
@@ -24,12 +28,224 @@ function formatDate(timestamp: number): string {
   return date.toLocaleDateString('zh-CN');
 }
 
+function buildCommentTree(comments: Comment[]): CommentNode[] {
+  const nodeMap = new Map<number, CommentNode>();
+  const roots: CommentNode[] = [];
+
+  comments.forEach((comment) => {
+    nodeMap.set(comment.id, { ...comment, replies: [] });
+  });
+
+  comments.forEach((comment) => {
+    const node = nodeMap.get(comment.id)!;
+    if (comment.parentId && nodeMap.has(comment.parentId)) {
+      nodeMap.get(comment.parentId)!.replies.push(node);
+    } else {
+      roots.push(node);
+    }
+  });
+
+  const sortReplies = (nodes: CommentNode[]): CommentNode[] => {
+    nodes.sort((a, b) => a.createdAt - b.createdAt);
+    nodes.forEach((node) => sortReplies(node.replies));
+    return nodes;
+  };
+
+  roots.sort((a, b) => b.createdAt - a.createdAt);
+  roots.forEach((root) => sortReplies(root.replies));
+
+  return roots;
+}
+
+interface CommentItemProps {
+  comment: CommentNode;
+  visitorName: string;
+  artworkId: number;
+  onReplyAdded: (newComment: Comment) => void;
+  submittingReply: number | null;
+  setSubmittingReply: (id: number | null) => void;
+  depth?: number;
+  index?: number;
+}
+
+const CommentItem: React.FC<CommentItemProps> = ({
+  comment,
+  visitorName,
+  artworkId,
+  onReplyAdded,
+  submittingReply,
+  setSubmittingReply,
+  depth = 0,
+  index = 0,
+}) => {
+  const [showReplyBox, setShowReplyBox] = useState(false);
+  const [replyContent, setReplyContent] = useState('');
+  const [replyAuthor, setReplyAuthor] = useState(visitorName);
+  const replyInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setReplyAuthor(visitorName);
+  }, [visitorName]);
+
+  useEffect(() => {
+    if (showReplyBox && replyInputRef.current) {
+      replyInputRef.current.focus();
+    }
+  }, [showReplyBox]);
+
+  const handleSubmitReply = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!replyContent.trim() || !replyAuthor.trim() || submittingReply === comment.id) return;
+
+    setSubmittingReply(comment.id);
+    try {
+      const res = await api.createComment(
+        artworkId,
+        replyAuthor.trim(),
+        replyContent.trim(),
+        comment.id,
+        comment.author
+      );
+      onReplyAdded(res.data);
+      setReplyContent('');
+      setShowReplyBox(false);
+    } catch (error) {
+      console.error('Failed to submit reply:', error);
+    } finally {
+      setSubmittingReply(null);
+    }
+  };
+
+  const isSubmitting = submittingReply === comment.id;
+
+  return (
+    <div
+      className="animate-slideInFromLeft"
+      style={{ animationDelay: `${index * 0.1}s` }}
+    >
+      <div className={`flex gap-3 ${depth > 0 ? 'ml-10 pl-4 border-l-2 border-pink-100' : ''}`}>
+        <Link
+          to={`/user/${encodeURIComponent(comment.author)}`}
+          className={`flex-shrink-0 ${depth === 0 ? 'w-10 h-10' : 'w-8 h-8'} bg-gradient-to-br from-blue-400 to-purple-400 rounded-full flex items-center justify-center text-white font-bold text-sm hover:scale-110 transition-transform`}
+        >
+          {comment.author.charAt(0)}
+        </Link>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <Link
+              to={`/user/${encodeURIComponent(comment.author)}`}
+              className="font-semibold text-gray-800 hover:text-pink-500 transition-colors"
+            >
+              {comment.author}
+            </Link>
+            {comment.replyTo && (
+              <span className="flex items-center text-xs text-gray-400">
+                <CornerDownRight className="w-3 h-3 mx-1" />
+                回复
+                <Link
+                  to={`/user/${encodeURIComponent(comment.replyTo)}`}
+                  className="ml-1 text-pink-500 hover:underline"
+                >
+                  @{comment.replyTo}
+                </Link>
+              </span>
+            )}
+            <span className="text-xs text-gray-400">{formatDate(comment.createdAt)}</span>
+          </div>
+          <div
+            className={`${
+              depth === 0
+                ? 'bg-gradient-to-r from-blue-50 to-purple-50'
+                : 'bg-gray-50'
+            } rounded-2xl rounded-tl-sm px-4 py-3 text-gray-700 break-words`}
+          >
+            {comment.content}
+          </div>
+          <button
+            onClick={() => setShowReplyBox(!showReplyBox)}
+            className="mt-2 text-xs text-gray-400 hover:text-pink-500 transition-colors flex items-center gap-1"
+          >
+            <CornerDownRight className="w-3 h-3" />
+            回复
+          </button>
+
+          {showReplyBox && (
+            <form onSubmit={handleSubmitReply} className="mt-3 space-y-2">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={replyAuthor}
+                  onChange={(e) => setReplyAuthor(e.target.value)}
+                  placeholder="你的昵称"
+                  className="w-28 px-3 py-2 text-sm border border-gray-200 rounded-xl focus:border-pink-400 focus:ring-2 focus:ring-pink-100 outline-none transition-all"
+                  maxLength={20}
+                />
+                <div className="flex-1 flex gap-2">
+                  <input
+                    ref={replyInputRef}
+                    type="text"
+                    value={replyContent}
+                    onChange={(e) => setReplyContent(e.target.value)}
+                    placeholder={`回复 @${comment.author}...`}
+                    className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-xl focus:border-pink-400 focus:ring-2 focus:ring-pink-100 outline-none transition-all"
+                    maxLength={200}
+                  />
+                  <button
+                    type="submit"
+                    disabled={!replyContent.trim() || !replyAuthor.trim() || isSubmitting}
+                    className="px-4 py-2 bg-gradient-to-r from-pink-500 to-yellow-500 text-white rounded-xl text-sm font-medium hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                  >
+                    {isSubmitting ? (
+                      <span className="animate-spin">⏳</span>
+                    ) : (
+                      <Send className="w-4 h-4" />
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowReplyBox(false);
+                      setReplyContent('');
+                    }}
+                    className="px-3 py-2 text-gray-400 hover:text-gray-600 text-sm transition-colors"
+                  >
+                    取消
+                  </button>
+                </div>
+              </div>
+            </form>
+          )}
+        </div>
+      </div>
+
+      {comment.replies.length > 0 && (
+        <div className="mt-3 space-y-3">
+          {comment.replies.map((reply, replyIndex) => (
+            <CommentItem
+              key={reply.id}
+              comment={reply}
+              visitorName={visitorName}
+              artworkId={artworkId}
+              onReplyAdded={onReplyAdded}
+              submittingReply={submittingReply}
+              setSubmittingReply={setSubmittingReply}
+              depth={depth + 1}
+              index={replyIndex}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 export const CommentSection: React.FC<CommentSectionProps> = ({ artworkId, visitorName }) => {
-  const [comments, setComments] = useState<Comment[]>([]);
+  const [allComments, setAllComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
   const [author, setAuthor] = useState(visitorName);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [submittingReply, setSubmittingReply] = useState<number | null>(null);
   const commentListRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -44,7 +260,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ artworkId, visit
     setLoading(true);
     try {
       const res = await api.getComments(artworkId);
-      setComments(res.data);
+      setAllComments(res.data);
     } catch (error) {
       console.error('Failed to load comments:', error);
     } finally {
@@ -59,7 +275,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ artworkId, visit
     setSubmitting(true);
     try {
       const res = await api.createComment(artworkId, author.trim(), newComment.trim());
-      setComments([res.data, ...comments]);
+      setAllComments([res.data, ...allComments]);
       setNewComment('');
     } catch (error) {
       console.error('Failed to submit comment:', error);
@@ -68,13 +284,19 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ artworkId, visit
     }
   };
 
+  const handleReplyAdded = (newReply: Comment) => {
+    setAllComments([...allComments, newReply]);
+  };
+
+  const commentTree = buildCommentTree(allComments);
+
   return (
     <div className="bg-white rounded-2xl shadow-lg p-6">
       <div className="flex items-center gap-2 mb-6">
         <MessageCircle className="w-6 h-6 text-blue-500" />
         <h3 className="text-xl font-bold text-gray-800">评论区</h3>
         <span className="px-2 py-0.5 bg-blue-100 text-blue-600 rounded-full text-sm font-medium">
-          {comments.length}
+          {allComments.length}
         </span>
       </div>
 
@@ -117,7 +339,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ artworkId, visit
         </div>
       </form>
 
-      <div ref={commentListRef} className="space-y-4 max-h-96 overflow-y-auto pr-2">
+      <div ref={commentListRef} className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
         {loading ? (
           <div className="space-y-3">
             {[...Array(3)].map((_, i) => (
@@ -130,39 +352,24 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ artworkId, visit
               </div>
             ))}
           </div>
-        ) : comments.length === 0 ? (
+        ) : allComments.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
             <MessageCircle className="w-12 h-12 mx-auto mb-3 text-gray-300" />
             <p>还没有评论，快来抢沙发吧~</p>
           </div>
         ) : (
-          comments.map((comment, index) => (
-            <div
+          commentTree.map((comment, index) => (
+            <CommentItem
               key={comment.id}
-              className="flex gap-3 animate-slideInFromLeft"
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
-              <Link
-                to={`/user/${encodeURIComponent(comment.author)}`}
-                className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-400 rounded-full flex items-center justify-center text-white font-bold text-sm hover:scale-110 transition-transform"
-              >
-                {comment.author.charAt(0)}
-              </Link>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <Link
-                    to={`/user/${encodeURIComponent(comment.author)}`}
-                    className="font-semibold text-gray-800 hover:text-pink-500 transition-colors"
-                  >
-                    {comment.author}
-                  </Link>
-                  <span className="text-xs text-gray-400">{formatDate(comment.createdAt)}</span>
-                </div>
-                <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl rounded-tl-sm px-4 py-3 text-gray-700">
-                  {comment.content}
-                </div>
-              </div>
-            </div>
+              comment={comment}
+              visitorName={visitorName}
+              artworkId={artworkId}
+              onReplyAdded={handleReplyAdded}
+              submittingReply={submittingReply}
+              setSubmittingReply={setSubmittingReply}
+              depth={0}
+              index={index}
+            />
           ))
         )}
       </div>

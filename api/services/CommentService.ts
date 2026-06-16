@@ -6,11 +6,17 @@ export class CommentService {
     return db.comments.getByArtworkId(artworkId);
   }
 
-  static createComment(artworkId: number, author: string, content: string): Comment {
+  static createComment(
+    artworkId: number,
+    author: string,
+    content: string,
+    parentId?: number,
+    replyTo?: string
+  ): Comment {
     const artwork = db.artworks.getById(artworkId);
     if (!artwork) {
       throw new Error('Artwork not found');
     }
-    return db.comments.create({ artworkId, author, content });
+    return db.comments.create({ artworkId, author, content, parentId, replyTo });
   }
 }

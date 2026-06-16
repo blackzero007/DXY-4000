@@ -20,7 +20,7 @@ export class CommentController {
   static createComment(req: Request, res: Response): void {
     try {
       const artworkId = parseInt(req.params.id);
-      const { author, content } = req.body;
+      const { author, content, parentId, replyTo } = req.body;
 
       if (isNaN(artworkId)) {
         res.status(400).json({ error: 'Invalid artwork ID' });
@@ -37,7 +37,21 @@ export class CommentController {
         return;
       }
 
-      const comment = CommentService.createComment(artworkId, author.trim(), content.trim());
+      const parsedParentId = parentId !== undefined && parentId !== null ? parseInt(parentId) : undefined;
+      if (parentId !== undefined && parentId !== null && isNaN(parsedParentId!)) {
+        res.status(400).json({ error: 'Invalid parentId' });
+        return;
+      }
+
+      const parsedReplyTo = replyTo && typeof replyTo === 'string' ? replyTo.trim() : undefined;
+
+      const comment = CommentService.createComment(
+        artworkId,
+        author.trim(),
+        content.trim(),
+        parsedParentId,
+        parsedReplyTo
+      );
       res.status(201).json({ data: comment });
     } catch (error) {
       if (error instanceof Error && error.message === 'Artwork not found') {

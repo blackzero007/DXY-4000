@@ -36,6 +36,17 @@ function readData(): DatabaseSchema {
         needsSave = true;
       }
     });
+
+    data.comments.forEach((comment) => {
+      if ((comment as any).parentId === undefined) {
+        (comment as any).parentId = undefined;
+        needsSave = true;
+      }
+      if ((comment as any).replyTo === undefined) {
+        (comment as any).replyTo = undefined;
+        needsSave = true;
+      }
+    });
     if (needsSave) {
       writeData(data);
     }
