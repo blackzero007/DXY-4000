@@ -8,6 +8,7 @@ export interface Artwork {
   tags: ArtworkTag[];
   likes: number;
   views: number;
+  commentCount: number;
   createdAt: number;
 }
 

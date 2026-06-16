@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Heart, User, Calendar, Eye } from 'lucide-react';
+import { Heart, User, Calendar, Eye, MessageCircle } from 'lucide-react';
 import type { Artwork, ArtworkTag } from '../../types';
 
 const TAG_COLORS: Record<ArtworkTag, string> = {
@@ -62,6 +62,10 @@ export const ArtworkCard: React.FC<ArtworkCardProps> = ({ artwork, index }) => {
           <div className="flex items-center gap-1">
             <Heart className="w-4 h-4 text-pink-500 fill-pink-500" />
             <span className="text-sm font-bold text-gray-700">{artwork.likes}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <MessageCircle className="w-4 h-4 text-purple-500" />
+            <span className="text-sm font-bold text-gray-700">{artwork.commentCount || 0}</span>
           </div>
         </div>
       </div>
