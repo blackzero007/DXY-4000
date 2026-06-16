@@ -1,7 +1,14 @@
 import React from 'react';
-import { Pencil, Eraser, Undo2, Trash2 } from 'lucide-react';
+import { Pencil, Eraser, Undo2, Trash2, Check } from 'lucide-react';
 import { ColorPalette } from './ColorPalette';
 import type { ToolType } from '../../types';
+
+const BG_COLORS = [
+  { color: '#FFFFFF', label: '白色' },
+  { color: '#F5F5DC', label: '米色' },
+  { color: '#808080', label: '灰色' },
+  { color: '#000000', label: '黑色' },
+];
 
 interface ToolbarProps {
   color: string;
@@ -10,6 +17,8 @@ interface ToolbarProps {
   onBrushSizeChange: (size: number) => void;
   tool: ToolType;
   onToolChange: (tool: ToolType) => void;
+  bgColor: string;
+  onBgColorChange: (color: string) => void;
   onUndo: () => void;
   onClear: () => void;
   canUndo: boolean;
@@ -22,6 +31,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   onBrushSizeChange,
   tool,
   onToolChange,
+  bgColor,
+  onBgColorChange,
   onUndo,
   onClear,
   canUndo,
@@ -32,6 +43,36 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-gray-700 whitespace-nowrap">颜色</span>
           <ColorPalette selectedColor={color} onColorChange={onColorChange} />
+        </div>
+
+        <div className="h-8 w-px bg-gray-300" />
+
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-gray-700 whitespace-nowrap">背景</span>
+          <div className="flex items-center gap-2">
+            {BG_COLORS.map(({ color: bg, label }) => (
+              <button
+                key={bg}
+                type="button"
+                onClick={() => onBgColorChange(bg)}
+                title={label}
+                className={`
+                  w-8 h-8 rounded-lg transition-all duration-200
+                  hover:scale-110 hover:shadow-lg
+                  flex items-center justify-center
+                  ${bgColor === bg ? 'scale-110 ring-2 ring-offset-2 ring-yellow-400 shadow-lg' : ''}
+                `}
+                style={{ backgroundColor: bg, border: bg === '#FFFFFF' ? '1px solid #e5e7eb' : 'none' }}
+              >
+                {bgColor === bg && (
+                  <Check
+                    className="w-4 h-4"
+                    style={{ color: bg === '#000000' || bg === '#808080' ? '#fff' : '#2D3436' }}
+                  />
+                )}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="h-8 w-px bg-gray-300" />

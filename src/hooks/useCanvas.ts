@@ -3,6 +3,7 @@ import type { ToolType } from '../types';
 
 const DEFAULT_COLOR = '#2D3436';
 const DEFAULT_BRUSH_SIZE = 5;
+const DEFAULT_BG_COLOR = '#FFFFFF';
 
 interface Point {
   x: number;
@@ -18,6 +19,7 @@ export function useCanvas(canvasWidth: number = 800, canvasHeight: number = 600)
   const [color, setColor] = useState(DEFAULT_COLOR);
   const [brushSize, setBrushSize] = useState(DEFAULT_BRUSH_SIZE);
   const [tool, setTool] = useState<ToolType>('pen');
+  const [bgColor, setBgColor] = useState(DEFAULT_BG_COLOR);
   const [isDrawing, setIsDrawing] = useState(false);
   const [canUndo, setCanUndo] = useState(false);
 
@@ -62,14 +64,14 @@ export function useCanvas(canvasWidth: number = 800, canvasHeight: number = 600)
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    ctx.fillStyle = '#FFFFFF';
+    ctx.fillStyle = bgColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
     saveToHistory();
-  }, [saveToHistory]);
+  }, [bgColor, saveToHistory]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -118,9 +120,9 @@ export function useCanvas(canvasWidth: number = 800, canvasHeight: number = 600)
 
     ctx.beginPath();
     ctx.arc(point.x, point.y, brushSize / 2, 0, Math.PI * 2);
-    ctx.fillStyle = tool === 'eraser' ? '#FFFFFF' : color;
+    ctx.fillStyle = tool === 'eraser' ? bgColor : color;
     ctx.fill();
-  }, [getCanvasPoint, color, brushSize, tool]);
+  }, [getCanvasPoint, color, brushSize, tool, bgColor]);
 
   const draw = useCallback((e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     e.preventDefault();
@@ -138,12 +140,12 @@ export function useCanvas(canvasWidth: number = 800, canvasHeight: number = 600)
     ctx.beginPath();
     ctx.moveTo(lastPoint.x, lastPoint.y);
     ctx.lineTo(currentPoint.x, currentPoint.y);
-    ctx.strokeStyle = tool === 'eraser' ? '#FFFFFF' : color;
+    ctx.strokeStyle = tool === 'eraser' ? bgColor : color;
     ctx.lineWidth = brushSize;
     ctx.stroke();
 
     lastPointRef.current = currentPoint;
-  }, [isDrawing, getCanvasPoint, color, brushSize, tool]);
+  }, [isDrawing, getCanvasPoint, color, brushSize, tool, bgColor]);
 
   const stopDrawing = useCallback(() => {
     if (isDrawing) {
@@ -160,8 +162,24 @@ export function useCanvas(canvasWidth: number = 800, canvasHeight: number = 600)
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    ctx.fillStyle = '#FFFFFF';
+    ctx.fillStyle = bgColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    saveToHistory();
+  }, [bgColor, saveToHistory]);
+
+  const setBackgroundColor = useCallback((newBgColor: string) => {
+    setBgColor(newBgColor);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    ctx.fillStyle = newBgColor;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    historyRef.current = [];
+    historyIndexRef.current = -1;
+    setCanUndo(false);
     saveToHistory();
   }, [saveToHistory]);
 
@@ -179,6 +197,8 @@ export function useCanvas(canvasWidth: number = 800, canvasHeight: number = 600)
     setBrushSize,
     tool,
     setTool,
+    bgColor,
+    setBackgroundColor,
     isDrawing,
     canUndo,
     startDrawing,
