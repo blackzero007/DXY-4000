@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, User, Calendar } from 'lucide-react';
+import { Heart, User, Calendar, Eye } from 'lucide-react';
 import type { Artwork } from '../../types';
 
 interface ArtworkCardProps {
@@ -38,9 +38,15 @@ export const ArtworkCard: React.FC<ArtworkCardProps> = ({ artwork, index }) => {
           loading="lazy"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        <div className="absolute bottom-3 right-3 flex items-center gap-1 px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full shadow-md">
-          <Heart className="w-4 h-4 text-pink-500 fill-pink-500" />
-          <span className="text-sm font-bold text-gray-700">{artwork.likes}</span>
+        <div className="absolute bottom-3 right-3 flex items-center gap-3 px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full shadow-md">
+          <div className="flex items-center gap-1">
+            <Eye className="w-4 h-4 text-blue-500" />
+            <span className="text-sm font-bold text-gray-700">{artwork.views || 0}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Heart className="w-4 h-4 text-pink-500 fill-pink-500" />
+            <span className="text-sm font-bold text-gray-700">{artwork.likes}</span>
+          </div>
         </div>
       </div>
       <div className="p-4">

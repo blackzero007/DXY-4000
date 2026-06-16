@@ -17,7 +17,18 @@ function readData(): DatabaseSchema {
       return initialData;
     }
     const raw = fs.readFileSync(DATA_FILE, 'utf-8');
-    return JSON.parse(raw);
+    const data: DatabaseSchema = JSON.parse(raw);
+    let needsSave = false;
+    data.artworks.forEach((artwork) => {
+      if (artwork.views === undefined || artwork.views === null) {
+        (artwork as any).views = Math.max(10, Math.floor((artwork.likes || 0) * 3 + Math.random() * 100));
+        needsSave = true;
+      }
+    });
+    if (needsSave) {
+      writeData(data);
+    }
+    return data;
   } catch {
     return initialData;
   }
@@ -33,16 +44,24 @@ function writeData(data: DatabaseSchema): void {
 
 export const db = {
   artworks: {
-    getAll: (): Artwork[] => readData().artworks,
-    getById: (id: number): Artwork | undefined => {
-      return readData().artworks.find((a) => a.id === id);
+    getAll: (): Artwork[] => {
+      const artworks = readData().artworks;
+      return artworks.map((a) => ({ ...a, views: a.views || 0 }));
     },
-    create: (artwork: Omit<Artwork, 'id' | 'likes' | 'createdAt'>): Artwork => {
+    getById: (id: number): Artwork | undefined => {
+      const artwork = readData().artworks.find((a) => a.id === id);
+      if (artwork) {
+        return { ...artwork, views: artwork.views || 0 };
+      }
+      return undefined;
+    },
+    create: (artwork: Omit<Artwork, 'id' | 'likes' | 'views' | 'createdAt'>): Artwork => {
       const data = readData();
       const newArtwork: Artwork = {
         ...artwork,
         id: data.artworks.length > 0 ? Math.max(...data.artworks.map((a) => a.id)) + 1 : 1,
         likes: 0,
+        views: 0,
         createdAt: Date.now(),
       };
       data.artworks.push(newArtwork);
@@ -54,6 +73,24 @@ export const db = {
       const artwork = data.artworks.find((a) => a.id === id);
       if (artwork) {
         artwork.likes = likes;
+        writeData(data);
+      }
+    },
+    incrementViews: (id: number): number => {
+      const data = readData();
+      const artwork = data.artworks.find((a) => a.id === id);
+      if (artwork) {
+        artwork.views = (artwork.views || 0) + 1;
+        writeData(data);
+        return artwork.views;
+      }
+      return 0;
+    },
+    updateViews: (id: number, views: number): void => {
+      const data = readData();
+      const artwork = data.artworks.find((a) => a.id === id);
+      if (artwork) {
+        artwork.views = views;
         writeData(data);
       }
     },

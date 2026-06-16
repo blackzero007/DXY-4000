@@ -4,6 +4,7 @@ export interface Artwork {
   author: string;
   imageData: string;
   likes: number;
+  views: number;
   createdAt: number;
 }
 

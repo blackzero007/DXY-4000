@@ -6,7 +6,7 @@ export class ArtworkService {
     let artworks = [...db.artworks.getAll()];
 
     if (sort === 'hot') {
-      artworks.sort((a, b) => b.likes - a.likes);
+      artworks.sort((a, b) => (b.views || 0) - (a.views || 0));
     } else {
       artworks.sort((a, b) => b.createdAt - a.createdAt);
     }
@@ -29,6 +29,15 @@ export class ArtworkService {
 
   static createArtwork(title: string, author: string, imageData: string): Artwork {
     return db.artworks.create({ title, author, imageData });
+  }
+
+  static incrementViews(artworkId: number): { views: number } {
+    const artwork = db.artworks.getById(artworkId);
+    if (!artwork) {
+      throw new Error('Artwork not found');
+    }
+    const views = db.artworks.incrementViews(artworkId);
+    return { views };
   }
 
   static toggleLike(artworkId: number, visitorId: string): { likes: number; liked: boolean } {

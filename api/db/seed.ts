@@ -5,31 +5,37 @@ const sampleArtworks = [
     title: '太阳公公',
     author: '小画家一号',
     likes: 42,
+    views: 180,
   },
   {
     title: '可爱小猫咪',
     author: '涂鸦达人',
     likes: 28,
+    views: 120,
   },
   {
     title: '彩虹桥',
     author: '创意无限',
     likes: 35,
+    views: 210,
   },
   {
     title: '快乐小鸟',
     author: '梦想家',
     likes: 19,
+    views: 95,
   },
   {
     title: '小星星',
     author: '童心未泯',
     likes: 56,
+    views: 320,
   },
   {
     title: '小房子',
     author: '建筑大师',
     likes: 15,
+    views: 75,
   },
 ];
 
@@ -61,6 +67,7 @@ export function seedDatabase(): void {
       imageData: generateSampleImageData(colors[index % colors.length]),
     });
     db.artworks.updateLikes(newArtwork.id, artwork.likes);
+    db.artworks.updateViews(newArtwork.id, artwork.views);
   });
 
   const seededArtworks = db.artworks.getAll();

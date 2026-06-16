@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, Calendar, ArrowLeft, Share2 } from 'lucide-react';
+import { User, Calendar, ArrowLeft, Share2, Eye } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { LikeButton } from './LikeButton';
 import { FavoriteButton } from './FavoriteButton';
@@ -76,6 +76,11 @@ export const ArtworkDetail: React.FC<ArtworkDetailProps> = ({ artwork, visitorId
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4" />
                   <span>{formatDate(artwork.createdAt)}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Eye className="w-4 h-4 text-blue-500" />
+                  <span className="font-medium text-blue-600">{artwork.views || 0}</span>
+                  <span className="text-gray-400">次浏览</span>
                 </div>
               </div>
             </div>

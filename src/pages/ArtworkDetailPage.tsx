@@ -24,7 +24,14 @@ export const ArtworkDetailPage: React.FC = () => {
     setError(null);
     try {
       const res = await api.getArtworkById(artworkId);
-      setArtwork(res.data);
+      const artworkData = res.data;
+      try {
+        const viewRes = await api.incrementViews(artworkId);
+        artworkData.views = viewRes.data.views;
+      } catch {
+        // 浏览量记录失败不影响主流程
+      }
+      setArtwork(artworkData);
     } catch (err) {
       setError('作品不存在或已被删除');
     } finally {

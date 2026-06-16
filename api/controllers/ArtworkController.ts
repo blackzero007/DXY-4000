@@ -119,4 +119,23 @@ export class ArtworkController {
       res.status(500).json({ error: 'Failed to check like status' });
     }
   }
+
+  static incrementViews(req: Request, res: Response): void {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        res.status(400).json({ error: 'Invalid artwork ID' });
+        return;
+      }
+
+      const result = ArtworkService.incrementViews(id);
+      res.json({ data: result });
+    } catch (error) {
+      if (error instanceof Error && error.message === 'Artwork not found') {
+        res.status(404).json({ error: 'Artwork not found' });
+        return;
+      }
+      res.status(500).json({ error: 'Failed to increment views' });
+    }
+  }
 }

@@ -46,6 +46,12 @@ export const api = {
     return request<ApiResponse<{ liked: boolean }>>(`/artworks/${artworkId}/like-status?visitorId=${visitorId}`);
   },
 
+  incrementViews: (artworkId: number): Promise<ApiResponse<{ views: number }>> => {
+    return request<ApiResponse<{ views: number }>>(`/artworks/${artworkId}/view`, {
+      method: 'POST',
+    });
+  },
+
   getComments: (artworkId: number): Promise<ApiResponse<Comment[]>> => {
     return request<ApiResponse<Comment[]>>(`/artworks/${artworkId}/comments`);
   },
