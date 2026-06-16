@@ -1,9 +1,11 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Palette, Sparkles, Search, X, Tag } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { Palette, Sparkles, Search, X, Tag, Loader2 } from 'lucide-react';
 import { ArtworkGrid } from '../components/Gallery/ArtworkGrid';
 import { SortTabs } from '../components/Gallery/SortTabs';
 import { api } from '../utils/api';
 import type { Artwork, ArtworkTag, SortType } from '../types';
+
+const PAGE_SIZE = 12;
 
 const ARTWORK_TAGS: ArtworkTag[] = ['风景', '人物', '动物', '抽象', '其他'];
 
@@ -27,8 +29,14 @@ export const GalleryPage: React.FC = () => {
   const [artworks, setArtworks] = useState<Artwork[]>([]);
   const [sort, setSort] = useState<SortType>('latest');
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
   const [searchKeyword, setSearchKeyword] = useState('');
   const [activeTag, setActiveTag] = useState<ArtworkTag | undefined>(undefined);
+
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const hasMore = artworks.length < total;
 
   const filteredArtworks = useMemo(() => {
     if (!searchKeyword.trim()) return artworks;
@@ -38,21 +46,48 @@ export const GalleryPage: React.FC = () => {
     );
   }, [artworks, searchKeyword]);
 
-  useEffect(() => {
-    loadArtworks();
-  }, [sort, activeTag]);
-
-  const loadArtworks = async () => {
-    setLoading(true);
+  const loadArtworks = useCallback(async (pageNum: number, append: boolean = false) => {
+    if (append) {
+      setLoadingMore(true);
+    } else {
+      setLoading(true);
+    }
     try {
-      const res = await api.getArtworks(sort, activeTag);
-      setArtworks(res.data);
+      const res = await api.getArtworks(sort, activeTag, pageNum, PAGE_SIZE);
+      if (append) {
+        setArtworks(prev => [...prev, ...res.data]);
+      } else {
+        setArtworks(res.data);
+      }
+      setTotal(res.total ?? 0);
+      setPage(pageNum);
     } catch (error) {
       console.error('Failed to load artworks:', error);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
-  };
+  }, [sort, activeTag]);
+
+  useEffect(() => {
+    loadArtworks(1, false);
+  }, [sort, activeTag]);
+
+  useEffect(() => {
+    if (!sentinelRef.current || !hasMore || loading || loadingMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loading && !loadingMore) {
+          loadArtworks(page + 1, true);
+        }
+      },
+      { rootMargin: '200px' }
+    );
+
+    observer.observe(sentinelRef.current);
+    return () => observer.disconnect();
+  }, [hasMore, loading, loadingMore, page, loadArtworks]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-yellow-50 to-blue-50">
@@ -142,7 +177,7 @@ export const GalleryPage: React.FC = () => {
                 <p className="text-sm text-gray-500">
                   {searchKeyword
                     ? `找到 ${filteredArtworks.length} 幅相关作品`
-                    : `共 ${artworks.length} 幅作品`
+                    : `共 ${total} 幅作品`
                   }
                 </p>
               </div>
@@ -151,6 +186,20 @@ export const GalleryPage: React.FC = () => {
           </div>
 
           <ArtworkGrid artworks={filteredArtworks} loading={loading} />
+
+          {!loading && (
+            <div ref={sentinelRef} className="flex justify-center py-8">
+              {loadingMore && (
+                <div className="flex items-center gap-2 text-gray-500">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>加载更多作品中...</span>
+                </div>
+              )}
+              {!hasMore && artworks.length > 0 && (
+                <p className="text-gray-400 text-sm">— 已加载全部作品 —</p>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

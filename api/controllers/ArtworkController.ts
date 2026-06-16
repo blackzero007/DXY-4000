@@ -8,9 +8,11 @@ export class ArtworkController {
   static getArtworks(req: Request, res: Response): void {
     try {
       const sort = (req.query.sort as SortType) || 'latest';
+      const tag = req.query.tag as ArtworkTag | undefined;
+      const page = req.query.page ? parseInt(req.query.page as string) : 1;
+      const pageSize = req.query.pageSize ? parseInt(req.query.pageSize as string) : 12;
       const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
       const offset = req.query.offset ? parseInt(req.query.offset as string) : undefined;
-      const tag = req.query.tag as ArtworkTag | undefined;
 
       if (sort !== 'hot' && sort !== 'latest' && sort !== 'mostComments') {
         res.status(400).json({ error: 'Invalid sort parameter. Must be "hot", "latest" or "mostComments"' });
@@ -22,8 +24,21 @@ export class ArtworkController {
         return;
       }
 
-      const result = ArtworkService.getArtworks(sort, limit, offset, tag);
-      res.json({ data: result.data, total: result.total });
+      if (isNaN(page) || page < 1) {
+        res.status(400).json({ error: 'Invalid page parameter. Must be a positive integer' });
+        return;
+      }
+
+      if (isNaN(pageSize) || pageSize < 1) {
+        res.status(400).json({ error: 'Invalid pageSize parameter. Must be a positive integer' });
+        return;
+      }
+
+      const effectiveLimit = limit ?? pageSize;
+      const effectiveOffset = offset ?? (page - 1) * pageSize;
+
+      const result = ArtworkService.getArtworks(sort, effectiveLimit, effectiveOffset, tag);
+      res.json({ data: result.data, total: result.total, page, pageSize });
     } catch (error) {
       res.status(500).json({ error: 'Failed to fetch artworks' });
     }

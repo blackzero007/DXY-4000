@@ -20,8 +20,8 @@ async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
 }
 
 export const api = {
-  getArtworks: (sort: SortType = 'latest', tag?: ArtworkTag): Promise<ApiResponse<Artwork[]>> => {
-    const params = new URLSearchParams({ sort });
+  getArtworks: (sort: SortType = 'latest', tag?: ArtworkTag, page: number = 1, pageSize: number = 12): Promise<ApiResponse<Artwork[]>> => {
+    const params = new URLSearchParams({ sort, page: String(page), pageSize: String(pageSize) });
     if (tag) params.append('tag', tag);
     return request<ApiResponse<Artwork[]>>(`/artworks?${params.toString()}`);
   },
