@@ -19,6 +19,14 @@ export interface Comment {
   createdAt: number;
 }
 
+export interface Message {
+  id: number;
+  author: string;
+  email?: string;
+  content: string;
+  createdAt: number;
+}
+
 export type SortType = 'hot' | 'latest';
 
 export type ToolType = 'pen' | 'eraser';

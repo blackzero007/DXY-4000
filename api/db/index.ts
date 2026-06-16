@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import type { DatabaseSchema, Artwork, ArtworkTag, Comment, LikeRecord } from '../../shared/types';
+import type { DatabaseSchema, Artwork, ArtworkTag, Comment, LikeRecord, Message } from '../../shared/types';
 
 const DATA_FILE = path.join(process.cwd(), 'data', 'db.json');
 
@@ -8,6 +8,7 @@ const initialData: DatabaseSchema = {
   artworks: [],
   comments: [],
   likeRecords: [],
+  messages: [],
 };
 
 function readData(): DatabaseSchema {
@@ -19,6 +20,12 @@ function readData(): DatabaseSchema {
     const raw = fs.readFileSync(DATA_FILE, 'utf-8');
     const data: DatabaseSchema = JSON.parse(raw);
     let needsSave = false;
+
+    if (!data.messages) {
+      data.messages = [];
+      needsSave = true;
+    }
+
     data.artworks.forEach((artwork) => {
       if (artwork.views === undefined || artwork.views === null) {
         (artwork as any).views = Math.max(10, Math.floor((artwork.likes || 0) * 3 + Math.random() * 100));
@@ -146,6 +153,47 @@ export const db = {
         (r) => !(r.artworkId === artworkId && r.visitorId === visitorId)
       );
       writeData(data);
+    },
+  },
+  messages: {
+    getAll: (): Message[] => {
+      return readData()
+        .messages.map((m) => ({ ...m }))
+        .sort((a, b) => b.createdAt - a.createdAt);
+    },
+    getById: (id: number): Message | undefined => {
+      return readData().messages.find((m) => m.id === id);
+    },
+    create: (message: Omit<Message, 'id' | 'createdAt'>): Message => {
+      const data = readData();
+      const newMessage: Message = {
+        ...message,
+        id: data.messages.length > 0 ? Math.max(...data.messages.map((m) => m.id)) + 1 : 1,
+        createdAt: Date.now(),
+      };
+      data.messages.push(newMessage);
+      writeData(data);
+      return newMessage;
+    },
+    update: (id: number, updates: Partial<Omit<Message, 'id' | 'createdAt'>>): Message | undefined => {
+      const data = readData();
+      const index = data.messages.findIndex((m) => m.id === id);
+      if (index !== -1) {
+        data.messages[index] = { ...data.messages[index], ...updates };
+        writeData(data);
+        return data.messages[index];
+      }
+      return undefined;
+    },
+    delete: (id: number): boolean => {
+      const data = readData();
+      const initialLength = data.messages.length;
+      data.messages = data.messages.filter((m) => m.id !== id);
+      if (data.messages.length !== initialLength) {
+        writeData(data);
+        return true;
+      }
+      return false;
     },
   },
 };

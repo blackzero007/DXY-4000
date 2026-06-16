@@ -6,6 +6,7 @@ import { CreatePage } from "@/pages/CreatePage";
 import { ArtworkDetailPage } from "@/pages/ArtworkDetailPage";
 import { FavoritesPage } from "@/pages/FavoritesPage";
 import { UserProfilePage } from "@/pages/UserProfilePage";
+import { MessageBoardPage } from "@/pages/MessageBoardPage";
 import { FavoritesProvider } from "@/context/FavoritesContext";
 
 export default function App() {
@@ -22,6 +23,7 @@ export default function App() {
                 <Route path="/artwork/:id" element={<ArtworkDetailPage />} />
                 <Route path="/favorites" element={<FavoritesPage />} />
                 <Route path="/user/:author" element={<UserProfilePage />} />
+                <Route path="/message-board" element={<MessageBoardPage />} />
               </Routes>
             </main>
           </div>

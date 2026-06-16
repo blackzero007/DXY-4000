@@ -8,6 +8,7 @@ import path from 'path'
 import dotenv from 'dotenv'
 import { fileURLToPath } from 'url'
 import artworkRoutes from './routes/artworks.js'
+import messageRoutes from './routes/messages.js'
 import { seedDatabase } from './db/seed.js'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -27,6 +28,7 @@ seedDatabase()
  * API Routes
  */
 app.use('/api/artworks', artworkRoutes)
+app.use('/api/messages', messageRoutes)
 
 /**
  * health

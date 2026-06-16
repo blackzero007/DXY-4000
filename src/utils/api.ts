@@ -1,4 +1,4 @@
-import type { Artwork, ArtworkTag, Comment, SortType, ApiResponse } from '../types';
+import type { Artwork, ArtworkTag, Comment, Message, SortType, ApiResponse } from '../types';
 
 const API_BASE = '/api';
 
@@ -67,5 +67,29 @@ export const api = {
 
   getArtworksByAuthor: (author: string): Promise<ApiResponse<Artwork[]>> => {
     return request<ApiResponse<Artwork[]>>(`/artworks/author/${encodeURIComponent(author)}`);
+  },
+
+  getMessages: (): Promise<ApiResponse<Message[]>> => {
+    return request<ApiResponse<Message[]>>('/messages');
+  },
+
+  createMessage: (author: string, content: string, email?: string): Promise<ApiResponse<Message>> => {
+    return request<ApiResponse<Message>>('/messages', {
+      method: 'POST',
+      body: JSON.stringify({ author, content, email }),
+    });
+  },
+
+  updateMessage: (id: number, updates: Partial<Omit<Message, 'id' | 'createdAt'>>): Promise<ApiResponse<Message>> => {
+    return request<ApiResponse<Message>>(`/messages/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+    });
+  },
+
+  deleteMessage: (id: number): Promise<{ success: boolean; message: string }> => {
+    return request<{ success: boolean; message: string }>(`/messages/${id}`, {
+      method: 'DELETE',
+    });
   },
 };

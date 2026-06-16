@@ -25,10 +25,19 @@ export interface LikeRecord {
   createdAt: number;
 }
 
+export interface Message {
+  id: number;
+  author: string;
+  email?: string;
+  content: string;
+  createdAt: number;
+}
+
 export interface DatabaseSchema {
   artworks: Artwork[];
   comments: Comment[];
   likeRecords: LikeRecord[];
+  messages: Message[];
 }
 
 export type SortType = 'hot' | 'latest';

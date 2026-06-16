@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Palette, Plus, Home, Star } from 'lucide-react';
+import { Palette, Plus, Home, Star, MessageSquare } from 'lucide-react';
 import { useFavorites } from '../../context/FavoritesContext';
 
 export const Header: React.FC = () => {
@@ -56,6 +56,19 @@ export const Header: React.FC = () => {
                 )}
               </div>
               <span className="hidden sm:inline">我的收藏</span>
+            </Link>
+            <Link
+              to="/message-board"
+              className={`
+                flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all duration-200
+                ${location.pathname === '/message-board'
+                  ? 'bg-gradient-to-r from-blue-100 to-purple-100 text-blue-600 shadow-md'
+                  : 'text-gray-600 hover:bg-gray-100'
+                }
+              `}
+            >
+              <MessageSquare className="w-5 h-5" />
+              <span className="hidden sm:inline">留言板</span>
             </Link>
             <Link
               to="/create"
