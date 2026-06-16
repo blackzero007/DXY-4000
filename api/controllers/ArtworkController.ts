@@ -1,6 +1,8 @@
 import type { Request, Response } from 'express';
 import { ArtworkService } from '../services/ArtworkService';
-import type { SortType } from '../../shared/types';
+import type { ArtworkTag, SortType } from '../../shared/types';
+
+const VALID_TAGS: ArtworkTag[] = ['风景', '人物', '动物', '抽象', '其他'];
 
 export class ArtworkController {
   static getArtworks(req: Request, res: Response): void {
@@ -8,13 +10,19 @@ export class ArtworkController {
       const sort = (req.query.sort as SortType) || 'latest';
       const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
       const offset = req.query.offset ? parseInt(req.query.offset as string) : undefined;
+      const tag = req.query.tag as ArtworkTag | undefined;
 
       if (sort !== 'hot' && sort !== 'latest') {
         res.status(400).json({ error: 'Invalid sort parameter. Must be "hot" or "latest"' });
         return;
       }
 
-      const result = ArtworkService.getArtworks(sort, limit, offset);
+      if (tag && !VALID_TAGS.includes(tag)) {
+        res.status(400).json({ error: `Invalid tag. Must be one of: ${VALID_TAGS.join(', ')}` });
+        return;
+      }
+
+      const result = ArtworkService.getArtworks(sort, limit, offset, tag);
       res.json({ data: result.data, total: result.total });
     } catch (error) {
       res.status(500).json({ error: 'Failed to fetch artworks' });
@@ -43,7 +51,7 @@ export class ArtworkController {
 
   static createArtwork(req: Request, res: Response): void {
     try {
-      const { title, author, imageData } = req.body;
+      const { title, author, imageData, tags } = req.body;
 
       if (!title || !author || !imageData) {
         res.status(400).json({ error: 'Missing required fields: title, author, imageData' });
@@ -65,7 +73,11 @@ export class ArtworkController {
         return;
       }
 
-      const artwork = ArtworkService.createArtwork(title.trim(), author.trim(), imageData);
+      const artworkTags: ArtworkTag[] = Array.isArray(tags)
+        ? tags.filter((t: string): t is ArtworkTag => VALID_TAGS.includes(t as ArtworkTag))
+        : [];
+
+      const artwork = ArtworkService.createArtwork(title.trim(), author.trim(), imageData, artworkTags);
       res.status(201).json({ data: artwork, message: 'Artwork created successfully' });
     } catch (error) {
       res.status(500).json({ error: 'Failed to create artwork' });

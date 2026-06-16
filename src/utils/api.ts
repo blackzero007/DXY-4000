@@ -1,4 +1,4 @@
-import type { Artwork, Comment, SortType, ApiResponse } from '../types';
+import type { Artwork, ArtworkTag, Comment, SortType, ApiResponse } from '../types';
 
 const API_BASE = '/api';
 
@@ -20,18 +20,20 @@ async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
 }
 
 export const api = {
-  getArtworks: (sort: SortType = 'latest'): Promise<ApiResponse<Artwork[]>> => {
-    return request<ApiResponse<Artwork[]>>(`/artworks?sort=${sort}`);
+  getArtworks: (sort: SortType = 'latest', tag?: ArtworkTag): Promise<ApiResponse<Artwork[]>> => {
+    const params = new URLSearchParams({ sort });
+    if (tag) params.append('tag', tag);
+    return request<ApiResponse<Artwork[]>>(`/artworks?${params.toString()}`);
   },
 
   getArtworkById: (id: number): Promise<ApiResponse<Artwork>> => {
     return request<ApiResponse<Artwork>>(`/artworks/${id}`);
   },
 
-  createArtwork: (title: string, author: string, imageData: string): Promise<ApiResponse<Artwork>> => {
+  createArtwork: (title: string, author: string, imageData: string, tags: ArtworkTag[] = []): Promise<ApiResponse<Artwork>> => {
     return request<ApiResponse<Artwork>>('/artworks', {
       method: 'POST',
-      body: JSON.stringify({ title, author, imageData }),
+      body: JSON.stringify({ title, author, imageData, tags }),
     });
   },
 

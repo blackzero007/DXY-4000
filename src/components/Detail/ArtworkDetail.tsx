@@ -1,11 +1,19 @@
 import React from 'react';
-import { User, Calendar, ArrowLeft, Share2, Eye } from 'lucide-react';
+import { User, Calendar, ArrowLeft, Share2, Eye, Tag } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { LikeButton } from './LikeButton';
 import { FavoriteButton } from './FavoriteButton';
 import { CommentSection } from './CommentSection';
 import { useToast } from '../common/Toast';
-import type { Artwork } from '../../types';
+import type { Artwork, ArtworkTag } from '../../types';
+
+const TAG_COLORS: Record<ArtworkTag, string> = {
+  '风景': 'bg-green-100 text-green-700 border-green-200',
+  '人物': 'bg-blue-100 text-blue-700 border-blue-200',
+  '动物': 'bg-orange-100 text-orange-700 border-orange-200',
+  '抽象': 'bg-purple-100 text-purple-700 border-purple-200',
+  '其他': 'bg-gray-100 text-gray-700 border-gray-200',
+};
 
 interface ArtworkDetailProps {
   artwork: Artwork;
@@ -83,6 +91,21 @@ export const ArtworkDetail: React.FC<ArtworkDetailProps> = ({ artwork, visitorId
                   <span className="text-gray-400">次浏览</span>
                 </div>
               </div>
+              {artwork.tags && artwork.tags.length > 0 && (
+                <div className="flex items-center gap-2 mt-3">
+                  <Tag className="w-4 h-4 text-gray-400" />
+                  <div className="flex flex-wrap gap-1.5">
+                    {artwork.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className={`px-2.5 py-1 rounded-full text-xs font-medium border ${TAG_COLORS[tag]}`}
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
             <div className="flex items-center gap-3 flex-wrap">
               <LikeButton

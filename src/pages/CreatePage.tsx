@@ -5,6 +5,7 @@ import { DrawingCanvas, DrawingCanvasHandle } from '../components/Canvas/Drawing
 import { PublishModal } from '../components/common/PublishModal';
 import { api } from '../utils/api';
 import { useVisitor } from '../hooks/useVisitor';
+import type { ArtworkTag } from '../types';
 
 interface CanvasSize {
   name: string;
@@ -38,7 +39,7 @@ export const CreatePage: React.FC = () => {
     }
   };
 
-  const handlePublish = async (title: string, author: string) => {
+  const handlePublish = async (title: string, author: string, tags: ArtworkTag[]) => {
     if (!canvasRef.current) return;
 
     setIsPublishing(true);
@@ -46,7 +47,7 @@ export const CreatePage: React.FC = () => {
       const imageData = canvasRef.current.getImageData();
       updateVisitorName(author);
       
-      const res = await api.createArtwork(title, author, imageData);
+      const res = await api.createArtwork(title, author, imageData, tags);
       setShowPublishModal(false);
       navigate(`/artwork/${res.data.id}`);
     } catch (error) {

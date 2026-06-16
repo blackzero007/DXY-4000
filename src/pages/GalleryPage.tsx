@@ -1,15 +1,34 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Palette, Sparkles, Search, X } from 'lucide-react';
+import { Palette, Sparkles, Search, X, Tag } from 'lucide-react';
 import { ArtworkGrid } from '../components/Gallery/ArtworkGrid';
 import { SortTabs } from '../components/Gallery/SortTabs';
 import { api } from '../utils/api';
-import type { Artwork, SortType } from '../types';
+import type { Artwork, ArtworkTag, SortType } from '../types';
+
+const ARTWORK_TAGS: ArtworkTag[] = ['风景', '人物', '动物', '抽象', '其他'];
+
+const TAG_FILTER_COLORS: Record<ArtworkTag, string> = {
+  '风景': 'bg-green-100 text-green-700 border-green-300 hover:bg-green-200',
+  '人物': 'bg-blue-100 text-blue-700 border-blue-300 hover:bg-blue-200',
+  '动物': 'bg-orange-100 text-orange-700 border-orange-300 hover:bg-orange-200',
+  '抽象': 'bg-purple-100 text-purple-700 border-purple-300 hover:bg-purple-200',
+  '其他': 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200',
+};
+
+const TAG_FILTER_SELECTED_COLORS: Record<ArtworkTag, string> = {
+  '风景': 'bg-green-500 text-white border-green-500 shadow-md shadow-green-200',
+  '人物': 'bg-blue-500 text-white border-blue-500 shadow-md shadow-blue-200',
+  '动物': 'bg-orange-500 text-white border-orange-500 shadow-md shadow-orange-200',
+  '抽象': 'bg-purple-500 text-white border-purple-500 shadow-md shadow-purple-200',
+  '其他': 'bg-gray-500 text-white border-gray-500 shadow-md shadow-gray-200',
+};
 
 export const GalleryPage: React.FC = () => {
   const [artworks, setArtworks] = useState<Artwork[]>([]);
   const [sort, setSort] = useState<SortType>('latest');
   const [loading, setLoading] = useState(true);
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [activeTag, setActiveTag] = useState<ArtworkTag | undefined>(undefined);
 
   const filteredArtworks = useMemo(() => {
     if (!searchKeyword.trim()) return artworks;
@@ -21,12 +40,12 @@ export const GalleryPage: React.FC = () => {
 
   useEffect(() => {
     loadArtworks();
-  }, [sort]);
+  }, [sort, activeTag]);
 
   const loadArtworks = async () => {
     setLoading(true);
     try {
-      const res = await api.getArtworks(sort);
+      const res = await api.getArtworks(sort, activeTag);
       setArtworks(res.data);
     } catch (error) {
       console.error('Failed to load artworks:', error);
@@ -80,6 +99,35 @@ export const GalleryPage: React.FC = () => {
                 </button>
               )}
             </div>
+          </div>
+
+          <div className="flex items-center justify-center gap-2 mb-8 animate-fadeInUp">
+            <Tag className="w-5 h-5 text-gray-400" />
+            <button
+              type="button"
+              onClick={() => setActiveTag(undefined)}
+              className={`px-4 py-2 rounded-full border-2 text-sm font-medium transition-all duration-200 ${
+                !activeTag
+                  ? 'bg-gradient-to-r from-pink-500 to-yellow-500 text-white border-pink-500 shadow-md shadow-pink-200'
+                  : 'bg-white/80 text-gray-600 border-gray-200 hover:bg-gray-100'
+              }`}
+            >
+              全部
+            </button>
+            {ARTWORK_TAGS.map((tag) => (
+              <button
+                key={tag}
+                type="button"
+                onClick={() => setActiveTag(activeTag === tag ? undefined : tag)}
+                className={`px-4 py-2 rounded-full border-2 text-sm font-medium transition-all duration-200 ${
+                  activeTag === tag
+                    ? TAG_FILTER_SELECTED_COLORS[tag]
+                    : TAG_FILTER_COLORS[tag]
+                }`}
+              >
+                {tag}
+              </button>
+            ))}
           </div>
 
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">

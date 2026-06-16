@@ -1,10 +1,29 @@
 import React, { useState } from 'react';
-import { X, Send, Sparkles } from 'lucide-react';
+import { X, Send, Sparkles, Tag } from 'lucide-react';
+import type { ArtworkTag } from '../../types';
+
+const ARTWORK_TAGS: ArtworkTag[] = ['风景', '人物', '动物', '抽象', '其他'];
+
+const TAG_COLORS: Record<ArtworkTag, string> = {
+  '风景': 'bg-green-100 text-green-700 border-green-300 hover:bg-green-200',
+  '人物': 'bg-blue-100 text-blue-700 border-blue-300 hover:bg-blue-200',
+  '动物': 'bg-orange-100 text-orange-700 border-orange-300 hover:bg-orange-200',
+  '抽象': 'bg-purple-100 text-purple-700 border-purple-300 hover:bg-purple-200',
+  '其他': 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200',
+};
+
+const TAG_SELECTED_COLORS: Record<ArtworkTag, string> = {
+  '风景': 'bg-green-500 text-white border-green-500',
+  '人物': 'bg-blue-500 text-white border-blue-500',
+  '动物': 'bg-orange-500 text-white border-orange-500',
+  '抽象': 'bg-purple-500 text-white border-purple-500',
+  '其他': 'bg-gray-500 text-white border-gray-500',
+};
 
 interface PublishModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onPublish: (title: string, author: string) => void;
+  onPublish: (title: string, author: string, tags: ArtworkTag[]) => void;
   defaultAuthor: string;
   isPublishing: boolean;
 }
@@ -18,14 +37,22 @@ export const PublishModal: React.FC<PublishModalProps> = ({
 }) => {
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState(defaultAuthor);
+  const [selectedTags, setSelectedTags] = useState<ArtworkTag[]>([]);
 
   if (!isOpen) return null;
+
+  const handleTagToggle = (tag: ArtworkTag) => {
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (title.trim() && author.trim()) {
-      onPublish(title.trim(), author.trim());
+      onPublish(title.trim(), author.trim(), selectedTags);
       setTitle('');
+      setSelectedTags([]);
     }
   };
 
@@ -77,6 +104,29 @@ export const PublishModal: React.FC<PublishModalProps> = ({
               className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-yellow-400 focus:ring-4 focus:ring-yellow-100 outline-none transition-all text-gray-800"
               maxLength={20}
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <Tag className="w-4 h-4 inline-block mr-1 -mt-0.5" />
+              作品标签 <span className="text-gray-400 font-normal">（可选，可多选）</span>
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {ARTWORK_TAGS.map((tag) => (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => handleTagToggle(tag)}
+                  className={`px-3 py-1.5 rounded-full border-2 text-sm font-medium transition-all duration-200 ${
+                    selectedTags.includes(tag)
+                      ? TAG_SELECTED_COLORS[tag]
+                      : TAG_COLORS[tag]
+                  }`}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="flex gap-3 pt-2">

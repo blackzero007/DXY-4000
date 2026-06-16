@@ -1,7 +1,15 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, User, Calendar, Eye } from 'lucide-react';
-import type { Artwork } from '../../types';
+import type { Artwork, ArtworkTag } from '../../types';
+
+const TAG_COLORS: Record<ArtworkTag, string> = {
+  '风景': 'bg-green-100 text-green-700',
+  '人物': 'bg-blue-100 text-blue-700',
+  '动物': 'bg-orange-100 text-orange-700',
+  '抽象': 'bg-purple-100 text-purple-700',
+  '其他': 'bg-gray-100 text-gray-700',
+};
 
 interface ArtworkCardProps {
   artwork: Artwork;
@@ -53,6 +61,18 @@ export const ArtworkCard: React.FC<ArtworkCardProps> = ({ artwork, index }) => {
         <h3 className="font-bold text-gray-800 text-lg mb-2 truncate group-hover:text-pink-500 transition-colors">
           {artwork.title}
         </h3>
+        {artwork.tags && artwork.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1 mb-2">
+            {artwork.tags.map((tag) => (
+              <span
+                key={tag}
+                className={`px-2 py-0.5 rounded-full text-xs font-medium ${TAG_COLORS[tag]}`}
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
         <div className="flex items-center justify-between text-sm text-gray-500">
           <div className="flex items-center gap-1">
             <User className="w-4 h-4" />

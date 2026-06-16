@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import type { DatabaseSchema, Artwork, Comment, LikeRecord } from '../../shared/types';
+import type { DatabaseSchema, Artwork, ArtworkTag, Comment, LikeRecord } from '../../shared/types';
 
 const DATA_FILE = path.join(process.cwd(), 'data', 'db.json');
 
@@ -44,14 +44,17 @@ function writeData(data: DatabaseSchema): void {
 
 export const db = {
   artworks: {
-    getAll: (): Artwork[] => {
-      const artworks = readData().artworks;
-      return artworks.map((a) => ({ ...a, views: a.views || 0 }));
+    getAll: (tag?: ArtworkTag): Artwork[] => {
+      let artworks = readData().artworks.map((a) => ({ ...a, views: a.views || 0, tags: a.tags || [] }));
+      if (tag) {
+        artworks = artworks.filter((a) => a.tags.includes(tag));
+      }
+      return artworks;
     },
     getById: (id: number): Artwork | undefined => {
       const artwork = readData().artworks.find((a) => a.id === id);
       if (artwork) {
-        return { ...artwork, views: artwork.views || 0 };
+        return { ...artwork, views: artwork.views || 0, tags: artwork.tags || [] };
       }
       return undefined;
     },
@@ -59,6 +62,7 @@ export const db = {
       const data = readData();
       const newArtwork: Artwork = {
         ...artwork,
+        tags: artwork.tags || [],
         id: data.artworks.length > 0 ? Math.max(...data.artworks.map((a) => a.id)) + 1 : 1,
         likes: 0,
         views: 0,

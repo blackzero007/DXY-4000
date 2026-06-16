@@ -1,9 +1,9 @@
 import { db } from '../db';
-import type { Artwork, SortType } from '../../shared/types';
+import type { Artwork, ArtworkTag, SortType } from '../../shared/types';
 
 export class ArtworkService {
-  static getArtworks(sort: SortType = 'latest', limit?: number, offset?: number): { data: Artwork[]; total: number } {
-    let artworks = [...db.artworks.getAll()];
+  static getArtworks(sort: SortType = 'latest', limit?: number, offset?: number, tag?: ArtworkTag): { data: Artwork[]; total: number } {
+    let artworks = [...db.artworks.getAll(tag)];
 
     if (sort === 'hot') {
       artworks.sort((a, b) => (b.views || 0) - (a.views || 0));
@@ -27,8 +27,8 @@ export class ArtworkService {
     return db.artworks.getById(id);
   }
 
-  static createArtwork(title: string, author: string, imageData: string): Artwork {
-    return db.artworks.create({ title, author, imageData });
+  static createArtwork(title: string, author: string, imageData: string, tags: ArtworkTag[] = []): Artwork {
+    return db.artworks.create({ title, author, imageData, tags });
   }
 
   static incrementViews(artworkId: number): { views: number } {

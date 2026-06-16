@@ -6,36 +6,42 @@ const sampleArtworks = [
     author: '小画家一号',
     likes: 42,
     views: 180,
+    tags: ['风景' as const],
   },
   {
     title: '可爱小猫咪',
     author: '涂鸦达人',
     likes: 28,
     views: 120,
+    tags: ['动物' as const],
   },
   {
     title: '彩虹桥',
     author: '创意无限',
     likes: 35,
     views: 210,
+    tags: ['风景' as const],
   },
   {
     title: '快乐小鸟',
     author: '梦想家',
     likes: 19,
     views: 95,
+    tags: ['动物' as const],
   },
   {
     title: '小星星',
     author: '童心未泯',
     likes: 56,
     views: 320,
+    tags: ['抽象' as const],
   },
   {
     title: '小房子',
     author: '建筑大师',
     likes: 15,
     views: 75,
+    tags: ['风景' as const],
   },
 ];
 
@@ -65,6 +71,7 @@ export function seedDatabase(): void {
       title: artwork.title,
       author: artwork.author,
       imageData: generateSampleImageData(colors[index % colors.length]),
+      tags: artwork.tags,
     });
     db.artworks.updateLikes(newArtwork.id, artwork.likes);
     db.artworks.updateViews(newArtwork.id, artwork.views);

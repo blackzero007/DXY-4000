@@ -1,8 +1,11 @@
+export type ArtworkTag = '风景' | '人物' | '动物' | '抽象' | '其他';
+
 export interface Artwork {
   id: number;
   title: string;
   author: string;
   imageData: string;
+  tags: ArtworkTag[];
   likes: number;
   views: number;
   createdAt: number;
