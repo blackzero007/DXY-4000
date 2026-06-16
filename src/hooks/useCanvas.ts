@@ -4,6 +4,7 @@ import type { ToolType } from '../types';
 const DEFAULT_COLOR = '#2D3436';
 const DEFAULT_BRUSH_SIZE = 5;
 const DEFAULT_BG_COLOR = '#FFFFFF';
+const DEFAULT_OPACITY = 100;
 
 interface Point {
   x: number;
@@ -19,6 +20,7 @@ export function useCanvas(canvasWidth: number = 800, canvasHeight: number = 600)
   const [color, setColor] = useState(DEFAULT_COLOR);
   const [brushSize, setBrushSize] = useState(DEFAULT_BRUSH_SIZE);
   const [tool, setTool] = useState<ToolType>('pen');
+  const [opacity, setOpacity] = useState(DEFAULT_OPACITY);
   const [bgColor, setBgColor] = useState(DEFAULT_BG_COLOR);
   const [isDrawing, setIsDrawing] = useState(false);
   const [canUndo, setCanUndo] = useState(false);
@@ -160,8 +162,10 @@ export function useCanvas(canvasWidth: number = 800, canvasHeight: number = 600)
     ctx.beginPath();
     ctx.arc(point.x, point.y, brushSize / 2, 0, Math.PI * 2);
     ctx.fillStyle = tool === 'eraser' ? bgColor : color;
+    ctx.globalAlpha = tool === 'eraser' ? 1 : opacity / 100;
     ctx.fill();
-  }, [getCanvasPoint, color, brushSize, tool, bgColor]);
+    ctx.globalAlpha = 1;
+  }, [getCanvasPoint, color, brushSize, tool, bgColor, opacity]);
 
   const draw = useCallback((e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     e.preventDefault();
@@ -180,11 +184,13 @@ export function useCanvas(canvasWidth: number = 800, canvasHeight: number = 600)
     ctx.moveTo(lastPoint.x, lastPoint.y);
     ctx.lineTo(currentPoint.x, currentPoint.y);
     ctx.strokeStyle = tool === 'eraser' ? bgColor : color;
+    ctx.globalAlpha = tool === 'eraser' ? 1 : opacity / 100;
     ctx.lineWidth = brushSize;
     ctx.stroke();
+    ctx.globalAlpha = 1;
 
     lastPointRef.current = currentPoint;
-  }, [isDrawing, getCanvasPoint, color, brushSize, tool, bgColor]);
+  }, [isDrawing, getCanvasPoint, color, brushSize, tool, bgColor, opacity]);
 
   const stopDrawing = useCallback(() => {
     if (isDrawing) {
@@ -237,6 +243,8 @@ export function useCanvas(canvasWidth: number = 800, canvasHeight: number = 600)
     setBrushSize,
     tool,
     setTool,
+    opacity,
+    setOpacity,
     bgColor,
     setBackgroundColor,
     isDrawing,

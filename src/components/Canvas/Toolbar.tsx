@@ -15,6 +15,8 @@ interface ToolbarProps {
   onColorChange: (color: string) => void;
   brushSize: number;
   onBrushSizeChange: (size: number) => void;
+  opacity: number;
+  onOpacityChange: (opacity: number) => void;
   tool: ToolType;
   onToolChange: (tool: ToolType) => void;
   bgColor: string;
@@ -31,6 +33,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   onColorChange,
   brushSize,
   onBrushSizeChange,
+  opacity,
+  onOpacityChange,
   tool,
   onToolChange,
   bgColor,
@@ -97,6 +101,23 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               className="rounded-full bg-gray-800"
               style={{ width: brushSize, height: brushSize }}
             />
+          </div>
+        </div>
+
+        <div className="h-8 w-px bg-gray-300" />
+
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-medium text-gray-700 whitespace-nowrap">不透明度</span>
+          <div className="flex items-center gap-2">
+            <input
+              type="range"
+              min="10"
+              max="100"
+              value={opacity}
+              onChange={(e) => onOpacityChange(Number(e.target.value))}
+              className="w-24 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-pink-500"
+            />
+            <span className="text-sm font-bold text-gray-700 w-10 text-center">{opacity}%</span>
           </div>
         </div>
 
