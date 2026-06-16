@@ -24,11 +24,16 @@ export const CreatePage: React.FC = () => {
   const canvasRef = useRef<DrawingCanvasHandle>(null);
   const [showPublishModal, setShowPublishModal] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
+  const [thumbnailUrl, setThumbnailUrl] = useState('');
   const [canvasSize, setCanvasSize] = useState<CanvasSize>(CANVAS_SIZES[1]);
   const { visitorName, updateVisitorName } = useVisitor();
   const navigate = useNavigate();
 
   const handlePublishClick = () => {
+    if (canvasRef.current) {
+      const thumb = canvasRef.current.getThumbnail(300, 225);
+      setThumbnailUrl(thumb);
+    }
     setShowPublishModal(true);
   };
 
@@ -139,6 +144,7 @@ export const CreatePage: React.FC = () => {
         onPublish={handlePublish}
         defaultAuthor={visitorName}
         isPublishing={isPublishing}
+        thumbnailUrl={thumbnailUrl}
       />
     </div>
   );

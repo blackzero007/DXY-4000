@@ -4,6 +4,7 @@ import { Toolbar } from './Toolbar';
 
 export interface DrawingCanvasHandle {
   getImageData: () => string;
+  getThumbnail: (maxWidth?: number, maxHeight?: number) => string;
 }
 
 interface DrawingCanvasProps {
@@ -17,6 +18,7 @@ export const DrawingCanvas = forwardRef<DrawingCanvasHandle, DrawingCanvasProps>
 
     useImperativeHandle(ref, () => ({
       getImageData: canvas.getImageData,
+      getThumbnail: canvas.getThumbnail,
     }));
 
     return (

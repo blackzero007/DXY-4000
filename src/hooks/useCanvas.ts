@@ -235,6 +235,25 @@ export function useCanvas(canvasWidth: number = 800, canvasHeight: number = 600)
     return canvas.toDataURL('image/png');
   }, []);
 
+  const getThumbnail = useCallback((maxWidth: number = 200, maxHeight: number = 150): string => {
+    const canvas = canvasRef.current;
+    if (!canvas) return '';
+
+    const { width, height } = canvas;
+    const ratio = Math.min(maxWidth / width, maxHeight / height, 1);
+    const thumbWidth = Math.floor(width * ratio);
+    const thumbHeight = Math.floor(height * ratio);
+
+    const thumbCanvas = document.createElement('canvas');
+    thumbCanvas.width = thumbWidth;
+    thumbCanvas.height = thumbHeight;
+    const ctx = thumbCanvas.getContext('2d');
+    if (!ctx) return '';
+
+    ctx.drawImage(canvas, 0, 0, thumbWidth, thumbHeight);
+    return thumbCanvas.toDataURL('image/png');
+  }, []);
+
   return {
     canvasRef,
     color,
@@ -257,6 +276,7 @@ export function useCanvas(canvasWidth: number = 800, canvasHeight: number = 600)
     undo,
     redo,
     getImageData,
+    getThumbnail,
     initCanvas,
   };
 }

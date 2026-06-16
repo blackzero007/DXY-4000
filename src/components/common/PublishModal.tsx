@@ -26,6 +26,7 @@ interface PublishModalProps {
   onPublish: (title: string, author: string, tags: ArtworkTag[]) => void;
   defaultAuthor: string;
   isPublishing: boolean;
+  thumbnailUrl: string;
 }
 
 export const PublishModal: React.FC<PublishModalProps> = ({
@@ -34,6 +35,7 @@ export const PublishModal: React.FC<PublishModalProps> = ({
   onPublish,
   defaultAuthor,
   isPublishing,
+  thumbnailUrl,
 }) => {
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState(defaultAuthor);
@@ -77,6 +79,36 @@ export const PublishModal: React.FC<PublishModalProps> = ({
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
+          <div className="flex justify-center">
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-pink-200 via-yellow-200 to-blue-200 rounded-xl blur-sm opacity-60" />
+              <div
+                className="relative bg-white rounded-xl shadow-lg overflow-hidden border-2 border-dashed border-pink-200"
+                style={{
+                  backgroundImage: `
+                    linear-gradient(45deg, #f5f5f5 25%, transparent 25%),
+                    linear-gradient(-45deg, #f5f5f5 25%, transparent 25%),
+                    linear-gradient(45deg, transparent 75%, #f5f5f5 75%),
+                    linear-gradient(-45deg, transparent 75%, #f5f5f5 75%)
+                  `,
+                  backgroundSize: '16px 16px',
+                  backgroundPosition: '0 0, 0 8px, 8px -8px, -8px 0px',
+                }}
+              >
+                {thumbnailUrl && (
+                  <img
+                    src={thumbnailUrl}
+                    alt="作品预览"
+                    className="max-w-full max-h-48 object-contain"
+                  />
+                )}
+              </div>
+              <div className="absolute -top-2 -right-2 px-2 py-1 bg-gradient-to-r from-pink-500 to-yellow-500 text-white text-xs font-bold rounded-full shadow-md">
+                预览
+              </div>
+            </div>
+          </div>
+
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               作品名称 <span className="text-red-500">*</span>
