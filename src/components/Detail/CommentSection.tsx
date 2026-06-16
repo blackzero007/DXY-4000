@@ -1,8 +1,34 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Send, User, MessageCircle, CornerDownRight } from 'lucide-react';
+import { Send, User, MessageCircle, CornerDownRight, Smile } from 'lucide-react';
 import { api } from '../../utils/api';
 import type { Comment } from '../../types';
+
+const DEFAULT_EMOJIS = ['👍', '❤️', '😂', '🎨', '✨', '🔥', '💯'];
+
+function insertEmojiAtCursor(
+  inputRef: React.RefObject<HTMLInputElement>,
+  emoji: string,
+  setValue: React.Dispatch<React.SetStateAction<string>>
+) {
+  const input = inputRef.current;
+  if (!input) {
+    setValue((prev) => prev + emoji);
+    return;
+  }
+
+  const start = input.selectionStart ?? input.value.length;
+  const end = input.selectionEnd ?? input.value.length;
+  const newValue = input.value.slice(0, start) + emoji + input.value.slice(end);
+
+  setValue(newValue);
+
+  requestAnimationFrame(() => {
+    input.focus();
+    const newPos = start + emoji.length;
+    input.setSelectionRange(newPos, newPos);
+  });
+}
 
 interface CommentSectionProps {
   artworkId: number;
@@ -81,6 +107,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
   const [showReplyBox, setShowReplyBox] = useState(false);
   const [replyContent, setReplyContent] = useState('');
   const [replyAuthor, setReplyAuthor] = useState(visitorName);
+  const [showReplyEmojiPicker, setShowReplyEmojiPicker] = useState(false);
   const replyInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -180,16 +207,41 @@ const CommentItem: React.FC<CommentItemProps> = ({
                   className="w-28 px-3 py-2 text-sm border border-gray-200 rounded-xl focus:border-pink-400 focus:ring-2 focus:ring-pink-100 outline-none transition-all"
                   maxLength={20}
                 />
-                <div className="flex-1 flex gap-2">
-                  <input
-                    ref={replyInputRef}
-                    type="text"
-                    value={replyContent}
-                    onChange={(e) => setReplyContent(e.target.value)}
-                    placeholder={`回复 @${comment.author}...`}
-                    className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-xl focus:border-pink-400 focus:ring-2 focus:ring-pink-100 outline-none transition-all"
-                    maxLength={200}
-                  />
+                <div className="flex-1 flex gap-2 items-center">
+                  <div className="flex-1 relative">
+                    <input
+                      ref={replyInputRef}
+                      type="text"
+                      value={replyContent}
+                      onChange={(e) => setReplyContent(e.target.value)}
+                      placeholder={`回复 @${comment.author}...`}
+                      className="w-full px-3 py-2 pr-10 text-sm border border-gray-200 rounded-xl focus:border-pink-400 focus:ring-2 focus:ring-pink-100 outline-none transition-all"
+                      maxLength={200}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowReplyEmojiPicker(!showReplyEmojiPicker)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-pink-500 transition-colors"
+                    >
+                      <Smile className="w-4 h-4" />
+                    </button>
+                    {showReplyEmojiPicker && (
+                      <div className="absolute left-0 bottom-full mb-2 flex gap-1 p-2 bg-white border border-gray-200 rounded-xl shadow-lg z-10">
+                        {DEFAULT_EMOJIS.map((emoji) => (
+                          <button
+                            key={emoji}
+                            type="button"
+                            onClick={() => {
+                              insertEmojiAtCursor(replyInputRef, emoji, setReplyContent);
+                            }}
+                            className="w-8 h-8 flex items-center justify-center text-lg hover:bg-pink-50 rounded-lg transition-colors"
+                          >
+                            {emoji}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                   <button
                     type="submit"
                     disabled={!replyContent.trim() || !replyAuthor.trim() || isSubmitting}
@@ -246,7 +298,9 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ artworkId, visit
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submittingReply, setSubmittingReply] = useState<number | null>(null);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const commentListRef = useRef<HTMLDivElement>(null);
+  const commentInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setAuthor(visitorName);
@@ -314,15 +368,41 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ artworkId, visit
               className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:border-pink-400 focus:ring-2 focus:ring-pink-100 outline-none transition-all"
               maxLength={20}
             />
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                placeholder="写下你的评论..."
-                className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-pink-400 focus:ring-4 focus:ring-pink-100 outline-none transition-all"
-                maxLength={200}
-              />
+            <div className="flex gap-2 items-center">
+              <div className="flex-1 relative">
+                <input
+                  ref={commentInputRef}
+                  type="text"
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  placeholder="写下你的评论..."
+                  className="w-full px-4 py-3 pr-12 border-2 border-gray-200 rounded-xl focus:border-pink-400 focus:ring-4 focus:ring-pink-100 outline-none transition-all"
+                  maxLength={200}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-pink-500 transition-colors"
+                >
+                  <Smile className="w-5 h-5" />
+                </button>
+                {showEmojiPicker && (
+                  <div className="absolute left-0 bottom-full mb-2 flex gap-1 p-2 bg-white border border-gray-200 rounded-xl shadow-lg z-10">
+                    {DEFAULT_EMOJIS.map((emoji) => (
+                      <button
+                        key={emoji}
+                        type="button"
+                        onClick={() => {
+                          insertEmojiAtCursor(commentInputRef, emoji, setNewComment);
+                        }}
+                        className="w-9 h-9 flex items-center justify-center text-xl hover:bg-pink-50 rounded-lg transition-colors"
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
               <button
                 type="submit"
                 disabled={!newComment.trim() || !author.trim() || submitting}
