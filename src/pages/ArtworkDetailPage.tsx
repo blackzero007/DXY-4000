@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { ArtworkDetail } from '../components/Detail/ArtworkDetail';
 import { api } from '../utils/api';
@@ -12,6 +12,7 @@ export const ArtworkDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { visitorId, visitorName } = useVisitor();
+  const viewedRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (id) {
@@ -25,12 +26,17 @@ export const ArtworkDetailPage: React.FC = () => {
     try {
       const res = await api.getArtworkById(artworkId);
       const artworkData = res.data;
-      try {
-        const viewRes = await api.incrementViews(artworkId);
-        artworkData.views = viewRes.data.views;
-      } catch {
-        // 浏览量记录失败不影响主流程
+
+      if (viewedRef.current !== artworkId) {
+        viewedRef.current = artworkId;
+        try {
+          const viewRes = await api.incrementViews(artworkId);
+          artworkData.views = viewRes.data.views;
+        } catch {
+          // 浏览量记录失败不影响主流程
+        }
       }
+
       setArtwork(artworkData);
     } catch (err) {
       setError('作品不存在或已被删除');
