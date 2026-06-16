@@ -12,6 +12,7 @@ export const LikeButton: React.FC<LikeButtonProps> = ({ artworkId, visitorId, in
   const [likes, setLikes] = useState(initialLikes);
   const [liked, setLiked] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isHeartbeating, setIsHeartbeating] = useState(false);
   const [particles, setParticles] = useState<number[]>([]);
 
   useEffect(() => {
@@ -31,6 +32,9 @@ export const LikeButton: React.FC<LikeButtonProps> = ({ artworkId, visitorId, in
       const newParticles = Array.from({ length: 8 }, (_, i) => i);
       setParticles(newParticles);
       setTimeout(() => setParticles([]), 600);
+      
+      setIsHeartbeating(true);
+      setTimeout(() => setIsHeartbeating(false), 500);
     }
 
     try {
@@ -57,7 +61,7 @@ export const LikeButton: React.FC<LikeButtonProps> = ({ artworkId, visitorId, in
             ? 'bg-gradient-to-r from-pink-500 to-red-500 text-white shadow-lg'
             : 'bg-white border-2 border-pink-200 text-pink-500 hover:border-pink-400 hover:shadow-md'
           }
-          ${isAnimating ? 'scale-110' : 'hover:scale-105'}
+          ${isHeartbeating ? 'animate-heartbeat' : 'hover:scale-105'}
         `}
       >
         <Heart
