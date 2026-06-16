@@ -5,6 +5,7 @@ import { GalleryPage } from "@/pages/GalleryPage";
 import { CreatePage } from "@/pages/CreatePage";
 import { ArtworkDetailPage } from "@/pages/ArtworkDetailPage";
 import { FavoritesPage } from "@/pages/FavoritesPage";
+import { UserProfilePage } from "@/pages/UserProfilePage";
 import { FavoritesProvider } from "@/context/FavoritesContext";
 
 export default function App() {
@@ -20,6 +21,7 @@ export default function App() {
                 <Route path="/create" element={<CreatePage />} />
                 <Route path="/artwork/:id" element={<ArtworkDetailPage />} />
                 <Route path="/favorites" element={<FavoritesPage />} />
+                <Route path="/user/:author" element={<UserProfilePage />} />
               </Routes>
             </main>
           </div>

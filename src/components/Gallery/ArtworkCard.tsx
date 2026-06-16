@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Heart, User, Calendar, Eye } from 'lucide-react';
 import type { Artwork, ArtworkTag } from '../../types';
 
@@ -32,6 +32,14 @@ function formatDate(timestamp: number): string {
 }
 
 export const ArtworkCard: React.FC<ArtworkCardProps> = ({ artwork, index }) => {
+  const navigate = useNavigate();
+
+  const handleAuthorClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate(`/user/${encodeURIComponent(artwork.author)}`);
+  };
+
   return (
     <Link
       to={`/artwork/${artwork.id}`}
@@ -74,10 +82,14 @@ export const ArtworkCard: React.FC<ArtworkCardProps> = ({ artwork, index }) => {
           </div>
         )}
         <div className="flex items-center justify-between text-sm text-gray-500">
-          <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={handleAuthorClick}
+            className="flex items-center gap-1 hover:text-pink-500 transition-colors z-10 relative"
+          >
             <User className="w-4 h-4" />
-            <span className="truncate max-w-20">{artwork.author}</span>
-          </div>
+            <span className="truncate max-w-20 font-medium">{artwork.author}</span>
+          </button>
           <div className="flex items-center gap-1">
             <Calendar className="w-4 h-4" />
             <span>{formatDate(artwork.createdAt)}</span>

@@ -150,4 +150,19 @@ export class ArtworkController {
       res.status(500).json({ error: 'Failed to increment views' });
     }
   }
+
+  static getArtworksByAuthor(req: Request, res: Response): void {
+    try {
+      const author = req.params.author;
+      if (!author || typeof author !== 'string' || author.trim().length === 0) {
+        res.status(400).json({ error: 'Invalid author parameter' });
+        return;
+      }
+
+      const result = ArtworkService.getArtworksByAuthor(decodeURIComponent(author));
+      res.json({ data: result.data, total: result.total });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch artworks by author' });
+    }
+  }
 }

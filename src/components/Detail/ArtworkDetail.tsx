@@ -75,12 +75,15 @@ export const ArtworkDetail: React.FC<ArtworkDetailProps> = ({ artwork, visitorId
                 {artwork.title}
               </h1>
               <div className="flex flex-wrap items-center gap-4 text-gray-600">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-gradient-to-br from-pink-400 to-yellow-400 rounded-full flex items-center justify-center">
+                <Link
+                  to={`/user/${encodeURIComponent(artwork.author)}`}
+                  className="flex items-center gap-2 hover:text-pink-500 transition-colors group"
+                >
+                  <div className="w-8 h-8 bg-gradient-to-br from-pink-400 to-yellow-400 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
                     <User className="w-4 h-4 text-white" />
                   </div>
                   <span className="font-medium">{artwork.author}</span>
-                </div>
+                </Link>
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4" />
                   <span>{formatDate(artwork.createdAt)}</span>

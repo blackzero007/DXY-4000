@@ -64,4 +64,9 @@ export class ArtworkService {
   static hasUserLiked(artworkId: number, visitorId: string): boolean {
     return db.likeRecords.hasLiked(artworkId, visitorId);
   }
+
+  static getArtworksByAuthor(author: string): { data: Artwork[]; total: number } {
+    const artworks = db.artworks.getByAuthor(author);
+    return { data: artworks, total: artworks.length };
+  }
 }

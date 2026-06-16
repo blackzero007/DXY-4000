@@ -58,6 +58,12 @@ export const db = {
       }
       return undefined;
     },
+    getByAuthor: (author: string): Artwork[] => {
+      return readData()
+        .artworks.filter((a) => a.author === author)
+        .map((a) => ({ ...a, views: a.views || 0, tags: a.tags || [] }))
+        .sort((a, b) => b.createdAt - a.createdAt);
+    },
     create: (artwork: Omit<Artwork, 'id' | 'likes' | 'views' | 'createdAt'>): Artwork => {
       const data = readData();
       const newArtwork: Artwork = {

@@ -64,4 +64,8 @@ export const api = {
       body: JSON.stringify({ author, content }),
     });
   },
+
+  getArtworksByAuthor: (author: string): Promise<ApiResponse<Artwork[]>> => {
+    return request<ApiResponse<Artwork[]>>(`/artworks/author/${encodeURIComponent(author)}`);
+  },
 };

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { Send, User, MessageCircle } from 'lucide-react';
 import { api } from '../../utils/api';
 import type { Comment } from '../../types';
@@ -141,12 +142,20 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ artworkId, visit
               className="flex gap-3 animate-slideInFromLeft"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-400 rounded-full flex items-center justify-center text-white font-bold text-sm">
+              <Link
+                to={`/user/${encodeURIComponent(comment.author)}`}
+                className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-400 rounded-full flex items-center justify-center text-white font-bold text-sm hover:scale-110 transition-transform"
+              >
                 {comment.author.charAt(0)}
-              </div>
+              </Link>
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="font-semibold text-gray-800">{comment.author}</span>
+                  <Link
+                    to={`/user/${encodeURIComponent(comment.author)}`}
+                    className="font-semibold text-gray-800 hover:text-pink-500 transition-colors"
+                  >
+                    {comment.author}
+                  </Link>
                   <span className="text-xs text-gray-400">{formatDate(comment.createdAt)}</span>
                 </div>
                 <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl rounded-tl-sm px-4 py-3 text-gray-700">
