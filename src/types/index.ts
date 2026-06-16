@@ -27,7 +27,7 @@ export interface Message {
   createdAt: number;
 }
 
-export type SortType = 'hot' | 'latest';
+export type SortType = 'hot' | 'latest' | 'mostComments';
 
 export type ToolType = 'pen' | 'eraser';
 

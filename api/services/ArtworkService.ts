@@ -7,6 +7,13 @@ export class ArtworkService {
 
     if (sort === 'hot') {
       artworks.sort((a, b) => (b.views || 0) - (a.views || 0));
+    } else if (sort === 'mostComments') {
+      const comments = db.comments.getAll();
+      const commentCounts = new Map<number, number>();
+      for (const comment of comments) {
+        commentCounts.set(comment.artworkId, (commentCounts.get(comment.artworkId) || 0) + 1);
+      }
+      artworks.sort((a, b) => (commentCounts.get(b.id) || 0) - (commentCounts.get(a.id) || 0));
     } else {
       artworks.sort((a, b) => b.createdAt - a.createdAt);
     }

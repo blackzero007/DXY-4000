@@ -1,5 +1,5 @@
 import React from 'react';
-import { Flame, Clock } from 'lucide-react';
+import { Flame, Clock, MessageSquare } from 'lucide-react';
 import type { SortType } from '../../types';
 
 interface SortTabsProps {
@@ -37,6 +37,20 @@ export const SortTabs: React.FC<SortTabsProps> = ({ sort, onSortChange }) => {
       >
         <Clock className="w-5 h-5" />
         最新
+      </button>
+      <button
+        type="button"
+        onClick={() => onSortChange('mostComments')}
+        className={`
+          flex items-center gap-2 px-5 py-2 rounded-full font-medium transition-all duration-300
+          ${sort === 'mostComments'
+            ? 'bg-white text-pink-500 shadow-md scale-105'
+            : 'text-gray-500 hover:text-gray-700'
+          }
+        `}
+      >
+        <MessageSquare className="w-5 h-5" />
+        最多评论
       </button>
     </div>
   );

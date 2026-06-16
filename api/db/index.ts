@@ -113,6 +113,9 @@ export const db = {
     },
   },
   comments: {
+    getAll: (): Comment[] => {
+      return readData().comments.map((c) => ({ ...c }));
+    },
     getByArtworkId: (artworkId: number): Comment[] => {
       return readData()
         .comments.filter((c) => c.artworkId === artworkId)

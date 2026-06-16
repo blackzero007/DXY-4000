@@ -40,4 +40,4 @@ export interface DatabaseSchema {
   messages: Message[];
 }
 
-export type SortType = 'hot' | 'latest';
+export type SortType = 'hot' | 'latest' | 'mostComments';
