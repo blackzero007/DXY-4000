@@ -1,9 +1,10 @@
 import React from 'react';
-import { User, Calendar, ArrowLeft } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { User, Calendar, ArrowLeft, Share2 } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
 import { LikeButton } from './LikeButton';
 import { FavoriteButton } from './FavoriteButton';
 import { CommentSection } from './CommentSection';
+import { useToast } from '../common/Toast';
 import type { Artwork } from '../../types';
 
 interface ArtworkDetailProps {
@@ -23,6 +24,31 @@ function formatDate(timestamp: number): string {
 }
 
 export const ArtworkDetail: React.FC<ArtworkDetailProps> = ({ artwork, visitorId, visitorName }) => {
+  const location = useLocation();
+  const { showToast } = useToast();
+
+  const handleShare = async () => {
+    const url = window.location.origin + location.pathname;
+    try {
+      await navigator.clipboard.writeText(url);
+      showToast('链接已复制', 'success');
+    } catch {
+      const textArea = document.createElement('textarea');
+      textArea.value = url;
+      textArea.style.position = 'fixed';
+      textArea.style.opacity = '0';
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        showToast('链接已复制', 'success');
+      } catch {
+        showToast('复制失败，请手动复制链接', 'error');
+      }
+      document.body.removeChild(textArea);
+    }
+  };
+
   return (
     <div className="max-w-5xl mx-auto animate-fadeIn">
       <Link
@@ -53,13 +79,25 @@ export const ArtworkDetail: React.FC<ArtworkDetailProps> = ({ artwork, visitorId
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               <LikeButton
                 artworkId={artwork.id}
                 visitorId={visitorId}
                 initialLikes={artwork.likes}
               />
               <FavoriteButton artwork={artwork} />
+              <button
+                type="button"
+                onClick={handleShare}
+                className="
+                  flex items-center gap-2 px-6 py-3 rounded-2xl font-bold text-lg
+                  transition-all duration-300 transform hover:scale-105
+                  bg-white border-2 border-blue-200 text-blue-500 hover:border-blue-400 hover:shadow-md
+                "
+              >
+                <Share2 className="w-6 h-6" />
+                <span>分享</span>
+              </button>
             </div>
           </div>
         </div>
