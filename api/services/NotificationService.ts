@@ -23,10 +23,14 @@ function getUserArtworkIds(visitorId?: string, author?: string): Set<number> {
   const ids = new Set<number>();
 
   for (const artwork of data.artworks) {
-    const matchesVisitorId = visitorId && artwork.visitorId === visitorId;
-    const matchesAuthor = author && artwork.author === author;
-    if (matchesVisitorId || matchesAuthor) {
-      ids.add(artwork.id);
+    if (artwork.visitorId) {
+      if (visitorId && artwork.visitorId === visitorId) {
+        ids.add(artwork.id);
+      }
+    } else {
+      if (author && artwork.author === author) {
+        ids.add(artwork.id);
+      }
     }
   }
 
