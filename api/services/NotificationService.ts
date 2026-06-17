@@ -1,4 +1,5 @@
 import { dbRaw } from '../db';
+import type { Artwork } from '../../shared/types';
 
 
 export interface NotificationCount {
@@ -17,17 +18,28 @@ export interface NotificationItem {
   createdAt: number;
 }
 
+function getUserArtworkIds(visitorId?: string, author?: string): Set<number> {
+  const data = dbRaw.readData();
+  const ids = new Set<number>();
+
+  for (const artwork of data.artworks) {
+    const matchesVisitorId = visitorId && artwork.visitorId === visitorId;
+    const matchesAuthor = author && artwork.author === author;
+    if (matchesVisitorId || matchesAuthor) {
+      ids.add(artwork.id);
+    }
+  }
+
+  return ids;
+}
+
 export class NotificationService {
-  static getUnreadCount(visitorId: string, since: number): NotificationCount {
-    const data = dbRaw.readData();
-    const visitorArtworkIds = new Set(
-      data.artworks
-        .filter((a) => a.visitorId === visitorId)
-        .map((a) => a.id)
-    );
+  static getUnreadCount(since: number, visitorId?: string, author?: string): NotificationCount {
+    const visitorArtworkIds = getUserArtworkIds(visitorId, author);
 
     let newComments = 0;
     let newLikes = 0;
+    const data = dbRaw.readData();
 
     for (const comment of data.comments) {
       if (visitorArtworkIds.has(comment.artworkId) && comment.createdAt > since) {
@@ -48,14 +60,10 @@ export class NotificationService {
     };
   }
 
-  static getNotifications(visitorId: string, since?: number): NotificationItem[] {
+  static getNotifications(since?: number, visitorId?: string, author?: string): NotificationItem[] {
+    const visitorArtworkIds = getUserArtworkIds(visitorId, author);
     const data = dbRaw.readData();
-    const artworkMap = new Map(data.artworks.map((a) => [a.id, a]));
-    const visitorArtworkIds = new Set(
-      data.artworks
-        .filter((a) => a.visitorId === visitorId)
-        .map((a) => a.id)
-    );
+    const artworkMap = new Map<number, Artwork>(data.artworks.map((a) => [a.id, a]));
 
     const items: NotificationItem[] = [];
     const threshold = since ?? 0;

@@ -37,8 +37,11 @@ export const api = {
     });
   },
 
-  getNotificationUnreadCount: (visitorId: string, since: number): Promise<ApiResponse<{ newComments: number; newLikes: number; total: number }>> => {
-    return request<ApiResponse<{ newComments: number; newLikes: number; total: number }>>(`/notifications/unread-count?visitorId=${encodeURIComponent(visitorId)}&since=${since}`);
+  getNotificationUnreadCount: (visitorId: string | undefined, author: string | undefined, since: number): Promise<ApiResponse<{ newComments: number; newLikes: number; total: number }>> => {
+    const params = new URLSearchParams({ since: String(since) });
+    if (visitorId) params.append('visitorId', visitorId);
+    if (author) params.append('author', author);
+    return request<ApiResponse<{ newComments: number; newLikes: number; total: number }>>(`/notifications/unread-count?${params.toString()}`);
   },
 
   toggleLike: (artworkId: number, visitorId: string): Promise<ApiResponse<{ likes: number; liked: boolean }>> => {

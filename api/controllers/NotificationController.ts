@@ -4,10 +4,13 @@ import { NotificationService } from '../services/NotificationService';
 export class NotificationController {
   static getUnreadCount(req: Request, res: Response): void {
     try {
-      const { visitorId, since } = req.query;
+      const { visitorId, author, since } = req.query;
 
-      if (!visitorId || typeof visitorId !== 'string') {
-        res.status(400).json({ error: 'Missing or invalid visitorId' });
+      const hasVisitorId = visitorId && typeof visitorId === 'string';
+      const hasAuthor = author && typeof author === 'string';
+
+      if (!hasVisitorId && !hasAuthor) {
+        res.status(400).json({ error: 'Missing required parameter: visitorId or author' });
         return;
       }
 
@@ -17,7 +20,11 @@ export class NotificationController {
         return;
       }
 
-      const result = NotificationService.getUnreadCount(visitorId, sinceTimestamp);
+      const result = NotificationService.getUnreadCount(
+        sinceTimestamp,
+        hasVisitorId ? (visitorId as string) : undefined,
+        hasAuthor ? (author as string) : undefined
+      );
       res.json({ data: result });
     } catch (error) {
       res.status(500).json({ error: 'Failed to fetch notification count' });
@@ -26,10 +33,13 @@ export class NotificationController {
 
   static getNotifications(req: Request, res: Response): void {
     try {
-      const { visitorId, since } = req.query;
+      const { visitorId, author, since } = req.query;
 
-      if (!visitorId || typeof visitorId !== 'string') {
-        res.status(400).json({ error: 'Missing or invalid visitorId' });
+      const hasVisitorId = visitorId && typeof visitorId === 'string';
+      const hasAuthor = author && typeof author === 'string';
+
+      if (!hasVisitorId && !hasAuthor) {
+        res.status(400).json({ error: 'Missing required parameter: visitorId or author' });
         return;
       }
 
@@ -39,7 +49,11 @@ export class NotificationController {
         return;
       }
 
-      const result = NotificationService.getNotifications(visitorId, sinceTimestamp);
+      const result = NotificationService.getNotifications(
+        sinceTimestamp,
+        hasVisitorId ? (visitorId as string) : undefined,
+        hasAuthor ? (author as string) : undefined
+      );
       res.json({ data: result });
     } catch (error) {
       res.status(500).json({ error: 'Failed to fetch notifications' });

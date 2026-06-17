@@ -10,7 +10,7 @@ const LAST_NOTIFICATION_READ_KEY = 'doodle_gallery_last_notification_read';
 export const Header: React.FC = () => {
   const location = useLocation();
   const { favorites } = useFavorites();
-  const { visitorId } = useVisitor();
+  const { visitorId, visitorName } = useVisitor();
   const [unreadCount, setUnreadCount] = useState(0);
 
   const getLastReadTime = useCallback((): number => {
@@ -19,25 +19,25 @@ export const Header: React.FC = () => {
   }, []);
 
   const fetchUnreadCount = useCallback(async () => {
-    if (!visitorId) return;
+    if (!visitorId && !visitorName) return;
     try {
       const since = getLastReadTime();
-      const res = await api.getNotificationUnreadCount(visitorId, since);
+      const res = await api.getNotificationUnreadCount(visitorId, visitorName, since);
       setUnreadCount(res.data.total);
     } catch (error) {
       console.error('Failed to fetch notification count:', error);
     }
-  }, [visitorId, getLastReadTime]);
+  }, [visitorId, visitorName, getLastReadTime]);
 
   useEffect(() => {
-    if (!visitorId) return;
+    if (!visitorId && !visitorName) return;
 
     fetchUnreadCount();
 
     const intervalId = setInterval(fetchUnreadCount, 30000);
 
     return () => clearInterval(intervalId);
-  }, [visitorId, fetchUnreadCount]);
+  }, [visitorId, visitorName, fetchUnreadCount]);
 
   const handleNotificationClick = () => {
     localStorage.setItem(LAST_NOTIFICATION_READ_KEY, String(Date.now()));
