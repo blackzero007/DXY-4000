@@ -64,6 +64,11 @@ function writeData(data: DatabaseSchema): void {
   fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8');
 }
 
+export const dbRaw = {
+  readData,
+  writeData,
+};
+
 export const db = {
   artworks: {
     getAll: (tag?: ArtworkTag): Artwork[] => {

@@ -1,11 +1,48 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Palette, Plus, Home, Star, MessageSquare } from 'lucide-react';
+import { Palette, Plus, Home, Star, MessageSquare, Bell } from 'lucide-react';
 import { useFavorites } from '../../context/FavoritesContext';
+import { useVisitor } from '../../hooks/useVisitor';
+import { api } from '../../utils/api';
+
+const LAST_NOTIFICATION_READ_KEY = 'doodle_gallery_last_notification_read';
 
 export const Header: React.FC = () => {
   const location = useLocation();
   const { favorites } = useFavorites();
+  const { visitorId } = useVisitor();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const getLastReadTime = useCallback((): number => {
+    const stored = localStorage.getItem(LAST_NOTIFICATION_READ_KEY);
+    return stored ? parseInt(stored, 10) : 0;
+  }, []);
+
+  const fetchUnreadCount = useCallback(async () => {
+    if (!visitorId) return;
+    try {
+      const since = getLastReadTime();
+      const res = await api.getNotificationUnreadCount(visitorId, since);
+      setUnreadCount(res.data.total);
+    } catch (error) {
+      console.error('Failed to fetch notification count:', error);
+    }
+  }, [visitorId, getLastReadTime]);
+
+  useEffect(() => {
+    if (!visitorId) return;
+
+    fetchUnreadCount();
+
+    const intervalId = setInterval(fetchUnreadCount, 30000);
+
+    return () => clearInterval(intervalId);
+  }, [visitorId, fetchUnreadCount]);
+
+  const handleNotificationClick = () => {
+    localStorage.setItem(LAST_NOTIFICATION_READ_KEY, String(Date.now()));
+    setUnreadCount(0);
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-pink-100 shadow-sm">
@@ -70,6 +107,25 @@ export const Header: React.FC = () => {
               <MessageSquare className="w-5 h-5" />
               <span className="hidden sm:inline">留言板</span>
             </Link>
+            <button
+              type="button"
+              onClick={handleNotificationClick}
+              className="
+                flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all duration-200
+                text-gray-600 hover:bg-gray-100 relative
+              "
+              title="通知"
+            >
+              <div className="relative">
+                <Bell className="w-5 h-5" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-2 -right-2 min-w-[20px] h-5 px-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-md animate-pulse">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
+              </div>
+              <span className="hidden sm:inline">通知</span>
+            </button>
             <Link
               to="/create"
               className={`

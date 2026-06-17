@@ -34,8 +34,8 @@ export class ArtworkService {
     return db.artworks.getById(id);
   }
 
-  static createArtwork(title: string, author: string, imageData: string, tags: ArtworkTag[] = []): Artwork {
-    return db.artworks.create({ title, author, imageData, tags });
+  static createArtwork(title: string, author: string, imageData: string, tags: ArtworkTag[] = [], visitorId?: string): Artwork {
+    return db.artworks.create({ title, author, imageData, tags, visitorId });
   }
 
   static incrementViews(artworkId: number): { views: number } {

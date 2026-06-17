@@ -4,6 +4,7 @@ export interface Artwork {
   id: number;
   title: string;
   author: string;
+  visitorId?: string;
   imageData: string;
   tags: ArtworkTag[];
   likes: number;

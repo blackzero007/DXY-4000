@@ -66,7 +66,7 @@ export class ArtworkController {
 
   static createArtwork(req: Request, res: Response): void {
     try {
-      const { title, author, imageData, tags } = req.body;
+      const { title, author, imageData, tags, visitorId } = req.body;
 
       if (!title || !author || !imageData) {
         res.status(400).json({ error: 'Missing required fields: title, author, imageData' });
@@ -92,7 +92,9 @@ export class ArtworkController {
         ? tags.filter((t: string): t is ArtworkTag => VALID_TAGS.includes(t as ArtworkTag))
         : [];
 
-      const artwork = ArtworkService.createArtwork(title.trim(), author.trim(), imageData, artworkTags);
+      const validVisitorId = visitorId && typeof visitorId === 'string' ? visitorId : undefined;
+
+      const artwork = ArtworkService.createArtwork(title.trim(), author.trim(), imageData, artworkTags, validVisitorId);
       res.status(201).json({ data: artwork, message: 'Artwork created successfully' });
     } catch (error) {
       res.status(500).json({ error: 'Failed to create artwork' });

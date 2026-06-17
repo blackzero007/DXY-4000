@@ -26,7 +26,7 @@ export const CreatePage: React.FC = () => {
   const [isPublishing, setIsPublishing] = useState(false);
   const [thumbnailUrl, setThumbnailUrl] = useState('');
   const [canvasSize, setCanvasSize] = useState<CanvasSize>(CANVAS_SIZES[1]);
-  const { visitorName, updateVisitorName } = useVisitor();
+  const { visitorId, visitorName, updateVisitorName } = useVisitor();
   const navigate = useNavigate();
 
   const handlePublishClick = () => {
@@ -52,7 +52,7 @@ export const CreatePage: React.FC = () => {
       const imageData = canvasRef.current.getImageData();
       updateVisitorName(author);
       
-      const res = await api.createArtwork(title, author, imageData, tags);
+      const res = await api.createArtwork(title, author, imageData, tags, visitorId);
       setShowPublishModal(false);
       navigate(`/artwork/${res.data.id}`);
     } catch (error) {

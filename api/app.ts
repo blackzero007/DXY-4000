@@ -9,6 +9,7 @@ import dotenv from 'dotenv'
 import { fileURLToPath } from 'url'
 import artworkRoutes from './routes/artworks.js'
 import messageRoutes from './routes/messages.js'
+import notificationRoutes from './routes/notifications.js'
 import { seedDatabase } from './db/seed.js'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -29,6 +30,7 @@ seedDatabase()
  */
 app.use('/api/artworks', artworkRoutes)
 app.use('/api/messages', messageRoutes)
+app.use('/api/notifications', notificationRoutes)
 
 /**
  * health

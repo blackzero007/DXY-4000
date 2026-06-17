@@ -30,11 +30,15 @@ export const api = {
     return request<ApiResponse<Artwork>>(`/artworks/${id}`);
   },
 
-  createArtwork: (title: string, author: string, imageData: string, tags: ArtworkTag[] = []): Promise<ApiResponse<Artwork>> => {
+  createArtwork: (title: string, author: string, imageData: string, tags: ArtworkTag[] = [], visitorId?: string): Promise<ApiResponse<Artwork>> => {
     return request<ApiResponse<Artwork>>('/artworks', {
       method: 'POST',
-      body: JSON.stringify({ title, author, imageData, tags }),
+      body: JSON.stringify({ title, author, imageData, tags, visitorId }),
     });
+  },
+
+  getNotificationUnreadCount: (visitorId: string, since: number): Promise<ApiResponse<{ newComments: number; newLikes: number; total: number }>> => {
+    return request<ApiResponse<{ newComments: number; newLikes: number; total: number }>>(`/notifications/unread-count?visitorId=${encodeURIComponent(visitorId)}&since=${since}`);
   },
 
   toggleLike: (artworkId: number, visitorId: string): Promise<ApiResponse<{ likes: number; liked: boolean }>> => {
