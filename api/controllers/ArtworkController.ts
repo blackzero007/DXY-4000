@@ -168,6 +168,22 @@ export class ArtworkController {
     }
   }
 
+  static getRelatedArtworks(req: Request, res: Response): void {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        res.status(400).json({ error: 'Invalid artwork ID' });
+        return;
+      }
+
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 4;
+      const artworks = ArtworkService.getRelatedArtworks(id, limit);
+      res.json({ data: artworks });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch related artworks' });
+    }
+  }
+
   static getArtworksByAuthor(req: Request, res: Response): void {
     try {
       const author = req.params.author;

@@ -76,4 +76,27 @@ export class ArtworkService {
     const artworks = db.artworks.getByAuthor(author);
     return { data: artworks, total: artworks.length };
   }
+
+  static getRelatedArtworks(artworkId: number, limit: number = 4): Artwork[] {
+    const artwork = db.artworks.getById(artworkId);
+    if (!artwork) return [];
+
+    const allArtworks = db.artworks.getAll();
+    const scored = allArtworks
+      .filter((a) => a.id !== artworkId)
+      .map((a) => {
+        let score = 0;
+        if (a.author === artwork.author) score += 2;
+        const commonTags = a.tags.filter((t) => artwork.tags.includes(t)).length;
+        score += commonTags * 3;
+        score += (a.likes || 0) * 0.01;
+        return { artwork: a, score };
+      })
+      .filter((item) => item.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, limit)
+      .map((item) => item.artwork);
+
+    return scored;
+  }
 }

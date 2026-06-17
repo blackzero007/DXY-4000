@@ -30,6 +30,10 @@ export const api = {
     return request<ApiResponse<Artwork>>(`/artworks/${id}`);
   },
 
+  getRelatedArtworks: (id: number, limit: number = 4): Promise<ApiResponse<Artwork[]>> => {
+    return request<ApiResponse<Artwork[]>>(`/artworks/${id}/related?limit=${limit}`);
+  },
+
   createArtwork: (title: string, author: string, imageData: string, tags: ArtworkTag[] = [], visitorId?: string): Promise<ApiResponse<Artwork>> => {
     return request<ApiResponse<Artwork>>('/artworks', {
       method: 'POST',

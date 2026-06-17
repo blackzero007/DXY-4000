@@ -6,6 +6,7 @@ const router = Router();
 
 router.get('/', ArtworkController.getArtworks);
 router.get('/author/:author', ArtworkController.getArtworksByAuthor);
+router.get('/:id/related', ArtworkController.getRelatedArtworks);
 router.get('/:id', ArtworkController.getArtworkById);
 router.post('/', ArtworkController.createArtwork);
 router.post('/:id/like', ArtworkController.toggleLike);

@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { ArtworkDetail } from '../components/Detail/ArtworkDetail';
+import { ArtworkCard } from '../components/Gallery/ArtworkCard';
 import { api } from '../utils/api';
 import { useVisitor } from '../hooks/useVisitor';
 import type { Artwork } from '../types';
-import { Palette, AlertCircle } from 'lucide-react';
+import { Palette, AlertCircle, Sparkles } from 'lucide-react';
 
 export const ArtworkDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [artwork, setArtwork] = useState<Artwork | null>(null);
+  const [relatedArtworks, setRelatedArtworks] = useState<Artwork[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { visitorId, visitorName } = useVisitor();
@@ -33,11 +35,17 @@ export const ArtworkDetailPage: React.FC = () => {
           const viewRes = await api.incrementViews(artworkId);
           artworkData.views = viewRes.data.views;
         } catch {
-          // 浏览量记录失败不影响主流程
         }
       }
 
       setArtwork(artworkData);
+
+      try {
+        const relatedRes = await api.getRelatedArtworks(artworkId, 4);
+        setRelatedArtworks(relatedRes.data);
+      } catch {
+        setRelatedArtworks([]);
+      }
     } catch (err) {
       setError('作品不存在或已被删除');
     } finally {
@@ -88,6 +96,25 @@ export const ArtworkDetailPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-yellow-50 to-blue-50 py-8 px-4">
       <ArtworkDetail artwork={artwork} visitorId={visitorId} visitorName={visitorName} />
+
+      {relatedArtworks.length > 0 && (
+        <div className="max-w-5xl mx-auto mt-8 animate-fadeInUp">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-pink-400 rounded-xl flex items-center justify-center shadow-md">
+              <Sparkles className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-gray-800">相关作品推荐</h2>
+              <p className="text-sm text-gray-500">根据标签和作者为你推荐</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {relatedArtworks.map((item, index) => (
+              <ArtworkCard key={item.id} artwork={item} index={index} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
